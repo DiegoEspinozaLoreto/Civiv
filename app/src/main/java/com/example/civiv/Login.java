@@ -46,21 +46,25 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         String user = editUser.getText().toString();
         String password = editPassword.getText().toString();
 
-
-        mAuth.signInWithEmailAndPassword(user, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Inicia la actividad Home si el inicio de sesión es exitoso
-                            Intent transicion = new Intent(Login.this, Home.class);
-                            startActivity(transicion);
-                        } else {
-                            // Muestra un mensaje de error si las credenciales son incorrectas
-                            Toast.makeText(Login.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+        if(!user.isEmpty() && !password.isEmpty()){
+            mAuth.signInWithEmailAndPassword(user, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                // Inicia la actividad Home si el inicio de sesión es exitoso
+                                Intent transicion = new Intent(Login.this, Home.class);
+                                startActivity(transicion);
+                            } else {
+                                // Muestra un mensaje de error si las credenciales son incorrectas
+                                Toast.makeText(Login.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
+        }else {
+            Toast.makeText(Login.this, "Debes rellenar todos los campos", Toast.LENGTH_SHORT).show();
+        }
+
     }
     public void goToSignUp(View view) {
         // Aquí maneja la acción de clic en el texto de registro

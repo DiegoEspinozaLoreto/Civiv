@@ -109,6 +109,20 @@
             app:layout_constraintTop_toBottomOf="@+id/toolbar2"
             app:layout_constraintVertical_bias="0.044" />
 
+        <ImageButton
+            android:id="@+id/regresarMenuButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:rotation="90"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.045"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar2"
+            app:layout_constraintVertical_bias="0.016"
+            app:srcCompat="@android:drawable/arrow_down_float"
+            android:contentDescription="Botón de regreso a inicio"/>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
