@@ -39,6 +39,10 @@
             android:name=".calculadora"
             android:exported="true"/>
 
+        <activity
+            android:name=".Lista"
+            android:exported="true"/>
+
     </application>
 
 </manifest>
