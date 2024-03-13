@@ -35,6 +35,10 @@
             android:name=".Registro"
             android:exported="true"/>
 
+        <activity
+            android:name=".calculadora"
+            android:exported="true"/>
+
     </application>
 
 </manifest>
