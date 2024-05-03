@@ -109,7 +109,7 @@
             app:layout_constraintVertical_bias="0.285" />
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/trainingButton"
             android:layout_width="130dp"
             android:layout_height="50dp"
             android:backgroundTint="#E04B00"
@@ -160,22 +160,6 @@
             app:layout_constraintVertical_bias="0.016"
             app:srcCompat="@android:drawable/arrow_down_float"
             android:contentDescription="Botón de regreso a inicio"/>
-
-        <ImageButton
-            android:id="@+id/btn_calc1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="36dp"
-            android:background="#00FFFFFF"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/button4"
-            app:layout_constraintTop_toBottomOf="@+id/imageButton7"
-            app:layout_constraintVertical_bias="0.998"
-            app:srcCompat="@drawable/calucadora_foreground"
-            android:contentDescription="Botón para ir a calculadora"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
