@@ -36,6 +36,10 @@ public class Home extends AppCompatActivity implements View.OnClickListener {
                 Intent transicion = new Intent(Home.this,Training.class);
                 startActivity(transicion);
             }
+            if(v.getId() == R.id.capturarButton){
+                Intent transicion = new Intent(Home.this,Capturar.class);
+                startActivity(transicion);
+            }
 
     }
 }

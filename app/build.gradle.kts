@@ -1,3 +1,6 @@
+import com.android.build.api.dsl.AaptOptions
+import com.android.build.api.dsl.AndroidResources
+
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services") version "4.4.1"
@@ -26,6 +29,8 @@ android {
             )
         }
     }
+
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -47,6 +52,14 @@ dependencies {
 
     //Firebase Authentication (Users & Passwords)
     implementation ("com.google.firebase:firebase-auth:22.3.1")
+
+    //TensorFlow
+    implementation ("org.tensorflow:tensorflow-lite-task-vision:0.4.0")
+    implementation ("org.tensorflow:tensorflow-lite:2.9.0")
+
+    // Import the GPU delegate plugin Library for GPU inference
+    implementation ("org.tensorflow:tensorflow-lite-gpu-delegate-plugin:0.4.0")
+    implementation ("org.tensorflow:tensorflow-lite-gpu:2.9.0")
 
 
 

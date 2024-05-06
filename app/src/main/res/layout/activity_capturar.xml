@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#EAF2EF"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="357dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar2"
@@ -30,8 +30,8 @@
             android:id="@+id/textView3"
             android:layout_width="68dp"
             android:layout_height="39dp"
-            android:text="CIVIV"
             android:contentDescription="Titulo de aplicacion"
+            android:text="CIVIV"
             android:textColor="#F4F4F4"
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -45,55 +45,15 @@
             android:id="@+id/imageButton7"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:contentDescription="Botón de puntos"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.950"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.014"
-            app:srcCompat="@mipmap/dots"
-            android:contentDescription="Botón de puntos" />
+            app:srcCompat="@mipmap/dots" />
 
-
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="130dp"
-            android:layout_height="130dp"
-            android:background="#FFFFFF"
-            android:backgroundTint="#00FFFFFF"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-            app:layout_constraintVertical_bias="0.05"
-            app:srcCompat="@android:drawable/ic_menu_camera"
-            android:contentDescription="Imagen de camara"/>
-
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="130dp"
-            android:layout_height="130dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.501"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-            app:layout_constraintVertical_bias="0.439"
-            app:srcCompat="@android:drawable/ic_menu_manage" />
-
-        <ImageView
-            android:id="@+id/imageView4"
-            android:layout_width="130dp"
-            android:layout_height="130dp"
-            android:backgroundTint="#FFFFFF"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.501"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-            app:layout_constraintVertical_bias="0.851"
-            app:srcCompat="@android:drawable/ic_menu_search" />
 
         <Button
             android:id="@+id/capturarButton"
@@ -102,38 +62,12 @@
             android:backgroundTint="#E04B00"
             android:text="Capturar"
             android:textAlignment="center"
-            app:layout_constraintBottom_toBottomOf="@+id/button4"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-            app:layout_constraintVertical_bias="0.285" />
-
-        <Button
-            android:id="@+id/trainingButton"
-            android:layout_width="130dp"
-            android:layout_height="50dp"
-            android:backgroundTint="#E04B00"
-            android:text="Entrenar"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.501"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-            app:layout_constraintVertical_bias="0.624" />
-
-        <Button
-            android:id="@+id/button4"
-            android:layout_width="130dp"
-            android:layout_height="50dp"
-            android:backgroundTint="#E04B00"
-            android:text="Productos"
-            app:iconTint="#0E04B0"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-            app:layout_constraintVertical_bias="0.974" />
+            app:layout_constraintVertical_bias="0.857" />
 
         <ImageView
             android:id="@+id/imageView5"
@@ -151,6 +85,7 @@
             android:id="@+id/regresarMenuButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:contentDescription="Botón de regreso a inicio"
             android:rotation="90"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -158,8 +93,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar2"
             app:layout_constraintVertical_bias="0.016"
-            app:srcCompat="@android:drawable/arrow_down_float"
-            android:contentDescription="Botón de regreso a inicio"/>
+            app:srcCompat="@android:drawable/arrow_down_float" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
