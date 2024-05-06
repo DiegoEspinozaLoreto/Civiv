@@ -45,12 +45,29 @@
         android:layout_marginTop="20dp"
         android:hint="Nombre imagen"
         android:textSize="20sp" />
+
+    <ImageView
+        android:id="@+id/ImagenPreview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editImagen"
+        android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btnSeleccionarImagen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ImagenPreview"
+        android:layout_marginTop="20dp"
+        android:text="Subir Imagen" />
+
+
     
     <Button
         android:id="@+id/btninsert"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/editImagen"
+        android:layout_below="@id/btnSeleccionarImagen"
         android:layout_marginTop="20dp"
         android:text="Aceptar alv" />
 
