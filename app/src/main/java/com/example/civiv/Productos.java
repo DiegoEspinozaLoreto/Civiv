@@ -5,7 +5,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
 @IgnoreExtraProperties
 public class Productos {
     private String name;
-    private String descripcion;
+    private String cantidad;
     private String imagen;
 
     public Productos() {
@@ -15,17 +15,17 @@ public class Productos {
         return name;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public String getCantidad() {
+        return cantidad;
     }
 
     public String getImagen() {
         return imagen;
     }
 
-    public Productos(String name, String descripcion, String imagen) {
+    public Productos(String name, String cantidad, String imagen) {
         this.name = name;
-        this.descripcion = descripcion;
+        this.cantidad = cantidad;
         this.imagen = imagen;
     }
 }

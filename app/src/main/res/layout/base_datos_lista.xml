@@ -1,84 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="10dp">
 
-    <TextView
-        android:id="@+id/textView5"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:layout_centerHorizontal="true"
-        android:gravity="center_horizontal"
-        android:text="Inserta datos del producto"
-        android:textColor="@color/black"
-        android:textSize="26sp"
+        android:layout_height="wrap_content">
 
-        />
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:text="Inserta datos del producto"
+            android:textColor="@color/black"
+            android:textSize="26sp"/>
 
-    <EditText
-        android:id="@+id/editProducto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/textView5"
-        android:layout_marginTop="20dp"
-        android:hint="Nombre del producto"
-        android:textSize="20sp" />
+        <EditText
+            android:id="@+id/editProducto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textView5"
+            android:layout_marginTop="20dp"
+            android:hint="Nombre del producto"
+            android:textSize="20sp" />
 
-    <EditText
-        android:id="@+id/editCantidad"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/editProducto"
-        android:layout_marginTop="20dp"
-        android:hint="Cantidad del producto"
-        android:textSize="20sp" />
+        <EditText
+            android:id="@+id/editCantidad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/editProducto"
+            android:layout_marginTop="20dp"
+            android:hint="Cantidad del producto"
+            android:textSize="20sp" />
 
-    <EditText
-        android:id="@+id/editImagen"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/editCantidad"
-        android:layout_marginTop="20dp"
-        android:hint="Nombre imagen"
-        android:textSize="20sp" />
-
-    <ImageView
-        android:id="@+id/ImagenPreview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/editImagen"
-        android:layout_marginTop="20dp"/>
-
-    <Button
-        android:id="@+id/btnSeleccionarImagen"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/ImagenPreview"
-        android:layout_marginTop="20dp"
-        android:text="Subir Imagen" />
+        <EditText
+            android:id="@+id/editImagen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/editCantidad"
+            android:layout_marginTop="20dp"
+            android:hint="Nombre imagen"
+            android:textSize="20sp" />
 
 
-    
-    <Button
-        android:id="@+id/btninsert"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/btnSeleccionarImagen"
-        android:layout_marginTop="20dp"
-        android:text="Aceptar alv" />
-
-    <Button
-        android:id="@+id/btnview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/btninsert"
-        android:layout_marginTop="20dp"
-        android:text="ver productos" />
-
-</RelativeLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Complete todos los campos y seleccione una imagen para continuar"
+            android:id="@+id/avisoCampoVacio"
+            android:layout_below="@+id/btnSeleccionarImagen"
+            android:layout_marginTop="20dp"
+            android:textSize="20sp"
+            android:textAlignment="center"/>
 
 
+
+        <ImageView
+            android:id="@+id/ImagenPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/editImagen"
+            android:layout_marginTop="20dp"/>
+
+        <Button
+            android:id="@+id/btnSeleccionarImagen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ImagenPreview"
+            android:layout_marginTop="20dp"
+            android:text="Subir Imagen" />
+
+        <Button
+            android:id="@+id/btninsert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/avisoCampoVacio"
+            android:layout_marginTop="20dp"
+            android:text="Aceptar alv" />
+
+        <Button
+            android:id="@+id/btnview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btninsert"
+            android:layout_marginTop="20dp"
+            android:text="ver productos" />
+
+    </RelativeLayout>
+</ScrollView>

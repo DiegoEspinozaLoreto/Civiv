@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/ic_launcher.webp-a829a81297ec0829ed2801a91424630d.stex"
+path="res://.import/dots-playstore.png-7cd34643cbc076642b438dc8a0f12548.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Civiv/app/src/main/res/mipmap-mdpi/ic_launcher.webp"
-dest_files=[ "res://.import/ic_launcher.webp-a829a81297ec0829ed2801a91424630d.stex" ]
+source_file="res://Civiv/app/src/main/dots-playstore.png"
+dest_files=[ "res://.import/dots-playstore.png-7cd34643cbc076642b438dc8a0f12548.stex" ]
 
 [params]
 
