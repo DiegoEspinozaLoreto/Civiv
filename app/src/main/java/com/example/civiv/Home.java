@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class Home extends AppCompatActivity implements View.OnClickListener {
         public ImageButton back;
         public Button train;
+        public Button capturar;
 
         @Override
 
@@ -23,6 +24,9 @@ public class Home extends AppCompatActivity implements View.OnClickListener {
 
             train = (Button) findViewById(R.id.trainingButton);
             train.setOnClickListener(this::onClick);
+
+            capturar = (Button) findViewById(R.id.capturarButton);
+            capturar.setOnClickListener(this::onClick);
         }
 
     @Override
