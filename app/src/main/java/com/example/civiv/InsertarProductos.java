@@ -1,5 +1,6 @@
 package com.example.civiv;
 
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,78 +37,60 @@ import com.google.firebase.storage.StorageReference;
 import com.bumptech.glide.Glide;
 import com.google.firebase.storage.UploadTask;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
 
 public class InsertarProductos extends AppCompatActivity {
     Button btnInsert, btnView, btnSeleccionarImagen;
-    EditText Producto, Cantidad, Imagen;
-
-    TextView avisoCampoVacio;
+    EditText nombreProducto, Cantidad;
     ImageView ImagenPreview;
     DatabaseReference databaseProductos;
-
-    StorageReference  storageReference;
-
+    StorageReference storageReference;
     Uri image;
+    List<Uri> productImages = new ArrayList<>();
+    int imageCounter = 1;
 
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
-            public void onActivityResult(ActivityResult result) {
-
+        public void onActivityResult(ActivityResult result) {
             if (result.getResultCode() == RESULT_OK) {
-               if (result.getData() != null) {
-                   image = result.getData().getData();
-                   Glide.with(getApplicationContext()).load(image).into(ImagenPreview);
-
-               } else {
-                   Toast.makeText(InsertarProductos.this, "Selecciona una imagen", Toast.LENGTH_SHORT).show();
-               }
-
+                if (result.getData() != null) {
+                    image = result.getData().getData();
+                    productImages.add(image);
+                    Glide.with(getApplicationContext()).load(image).into(ImagenPreview);
+                } else {
+                    Toast.makeText(InsertarProductos.this, "Selecciona una imagen", Toast.LENGTH_SHORT).show();
+                }
             }
-
-            }
+        }
     });
+
     @Override
-    protected void onCreate (Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.base_datos_lista);
         btnInsert = findViewById(R.id.btninsert);
         btnView = findViewById(R.id.btnview);
         btnSeleccionarImagen = findViewById(R.id.btnSeleccionarImagen);
         ImagenPreview = findViewById(R.id.ImagenPreview);
-        Producto = findViewById(R.id.editProducto);
+        nombreProducto = findViewById(R.id.editProducto);
         Cantidad = findViewById(R.id.editCantidad);
-        Imagen = findViewById(R.id.editImagen);
         databaseProductos = FirebaseDatabase.getInstance().getReference();
         storageReference = FirebaseStorage.getInstance().getReference();
-        avisoCampoVacio = findViewById(R.id.avisoCampoVacio);
-
-        avisoCampoVacio.setVisibility(View.GONE);
 
         btnInsert.setEnabled(false);
-
         addNumberInputFilter(Cantidad);
         Cantidad.setInputType(InputType.TYPE_CLASS_NUMBER);
-
-
-
-
-
-
-
-
 
         btnInsert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 InsertData();
-                uploadImage(image);
+                uploadMultipleImages(productImages, nombreProducto.getText().toString());
                 clearFields();
-                btnInsert.setEnabled(false);
-                avisoCampoVacio.setVisibility(View.GONE);
             }
-
-
         });
 
         btnSeleccionarImagen.setOnClickListener(new View.OnClickListener() {
@@ -127,22 +110,28 @@ public class InsertarProductos extends AppCompatActivity {
             }
         });
 
-        // Verificar campos antes de habilitar el botón de subir
-        Producto.addTextChangedListener(new TextWatcher() {
+        nombreProducto.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Verificar si el campo de producto está vacío
+                if (TextUtils.isEmpty(s)) {
+                    btnSeleccionarImagen.setEnabled(false);
+                } else {
+                    btnSeleccionarImagen.setEnabled(true);
+                }
+                // Llamar a la función para verificar todos los campos
                 checkFieldsForEmptyValues();
-
             }
 
             @Override
             public void afterTextChanged(Editable s) {
             }
         });
+
 
         Cantidad.addTextChangedListener(new TextWatcher() {
             @Override
@@ -152,111 +141,97 @@ public class InsertarProductos extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 checkFieldsForEmptyValues();
-
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-            }
-        });
-
-        Imagen.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                checkFieldsForEmptyValues();
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-        btnSeleccionarImagen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType("image/*");
-                activityResultLauncher.launch(intent);
             }
         });
     }
 
-    // Método para verificar si los campos están vacíos
     private void checkFieldsForEmptyValues() {
-        String producto = Producto.getText().toString().trim();
+        String producto = nombreProducto.getText().toString().trim();
         String cantidad = Cantidad.getText().toString().trim();
-        String imagen = Imagen.getText().toString().trim();
 
-        // Verificar que los campos no sean nulos
-        if (producto != null && cantidad != null && imagen != null) {
-            // Verificar que los campos no estén vacíos
-            if (!TextUtils.isEmpty(producto) && !TextUtils.isEmpty(cantidad) && !TextUtils.isEmpty(imagen) && image != null) {
+        if (producto != null && cantidad != null) {
+            if (!TextUtils.isEmpty(producto) && !TextUtils.isEmpty(cantidad) && image != null) {
                 btnInsert.setEnabled(true);
-                avisoCampoVacio.setVisibility(View.GONE);
             } else {
                 btnInsert.setEnabled(false);
-                avisoCampoVacio.setVisibility(View.VISIBLE);
             }
         } else {
-            // Si alguno de los campos es nulo, deshabilitar el botón
             btnInsert.setEnabled(false);
-            avisoCampoVacio.setVisibility(View.VISIBLE);
         }
     }
 
     private void clearFields() {
-        Producto.setText("");
+        nombreProducto.setText("");
         Cantidad.setText("");
-        Imagen.setText("");
-        ImagenPreview.setImageResource(android.R.color.transparent); // Limpiar la imagen previa
+        ImagenPreview.setImageResource(android.R.color.transparent);
+        productImages.clear();
+        imageCounter = 1;
     }
 
 
-
-    private void uploadImage(Uri image) {
-        StorageReference reference = storageReference.child("images/"+ UUID.randomUUID().toString());
-        reference.putFile(image).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Toast.makeText(InsertarProductos.this, "Imagen subida", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(InsertarProductos.this, "Imagen no subida", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(@NonNull UploadTask.TaskSnapshot snapshot) {
-                Toast.makeText(InsertarProductos.this, "Subiendo imagen...", Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void uploadMultipleImages(List<Uri> images, String Producto) {
+        for (Uri imageUri : images) {
+            StorageReference reference = storageReference.child("images/" + Producto + "imagen" + imageCounter);
+            reference.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // Image uploaded successfully
+                    imageCounter++;
+                    Toast.makeText(InsertarProductos.this, "Imagen subida", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // Handle image upload failure
+                    Toast.makeText(InsertarProductos.this, "Error al subir imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
+
+    private List<String> obtenerNombresDeImagenes(String Producto, int imageCounter) {
+        List<String> nombresImagenes = new ArrayList<>();
+        for (int i = 1; i <= imageCounter; i++) {
+            nombresImagenes.add(Producto + "imagen" + i);
+        }
+        return nombresImagenes;
+    }
+
 
 
     private void InsertData() {
-        String productosProducto = Producto.getText().toString();
+        String productosProducto = nombreProducto.getText().toString();
         String productosCantidad = Cantidad.getText().toString();
-        String productosImagen = Imagen.getText().toString();
         String id = databaseProductos.push().getKey();
+        List<String> imagenes = obtenerNombreDeImagenes();
 
-        Productos productos = new Productos(productosProducto,productosCantidad,productosImagen);
-        databaseProductos.child("productos").child(id).setValue(productos)
+        Productoss productoss = new Productoss(id, productosProducto, productosCantidad, imagenes);
+        databaseProductos.child("productos").child(id).setValue(productoss)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()){
-                            Toast.makeText(InsertarProductos.this, "Producto insertado",Toast.LENGTH_SHORT).show();
+                        if (task.isSuccessful()) {
+                            Toast.makeText(InsertarProductos.this, "Producto insertado", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(InsertarProductos.this, "Error al insertar producto", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
-
     }
+
+    private List<String> obtenerNombreDeImagenes() {
+        List<String> nombresImagenes = new ArrayList<>();
+        for (int i = 1; i <= imageCounter; i++) {
+            nombresImagenes.add(nombreProducto + "imagen" + i);
+        }
+        return nombresImagenes;
+    }
+
+
 
     private void addNumberInputFilter(EditText editText) {
         editText.setFilters(new InputFilter[]{new InputFilter() {
@@ -264,13 +239,12 @@ public class InsertarProductos extends AppCompatActivity {
             public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
                 for (int i = start; i < end; i++) {
                     if (!Character.isDigit(source.charAt(i))) {
-                        return ""; // Rechazar el carácter si no es un número
+                        return ""; // Reject the character if it's not a digit
                     }
                 }
-                return null; // Aceptar los caracteres solo si son números
+                return null; // Accept characters only if they are digits
             }
         }});
     }
 }
-
 
