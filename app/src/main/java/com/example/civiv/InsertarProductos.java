@@ -60,6 +60,7 @@ public class InsertarProductos extends AppCompatActivity {
                     image = result.getData().getData();
                     productImages.add(image);
                     Glide.with(getApplicationContext()).load(image).into(ImagenPreview);
+                    checkFieldsForEmptyValues();
                 } else {
                     Toast.makeText(InsertarProductos.this, "Selecciona una imagen", Toast.LENGTH_SHORT).show();
                 }
@@ -83,6 +84,7 @@ public class InsertarProductos extends AppCompatActivity {
         btnInsert.setEnabled(false);
         addNumberInputFilter(Cantidad);
         Cantidad.setInputType(InputType.TYPE_CLASS_NUMBER);
+        btnSeleccionarImagen.setEnabled(false);
 
         btnInsert.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,9 +98,10 @@ public class InsertarProductos extends AppCompatActivity {
         btnSeleccionarImagen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK);
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
-                activityResultLauncher.launch(intent);
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                activityResultLauncher.launch(Intent.createChooser(intent, "Selecciona las imagenes"));
             }
         });
 
@@ -193,13 +196,7 @@ public class InsertarProductos extends AppCompatActivity {
         }
     }
 
-    private List<String> obtenerNombresDeImagenes(String Producto, int imageCounter) {
-        List<String> nombresImagenes = new ArrayList<>();
-        for (int i = 1; i <= imageCounter; i++) {
-            nombresImagenes.add(Producto + "imagen" + i);
-        }
-        return nombresImagenes;
-    }
+
 
 
 
@@ -226,7 +223,7 @@ public class InsertarProductos extends AppCompatActivity {
     private List<String> obtenerNombreDeImagenes() {
         List<String> nombresImagenes = new ArrayList<>();
         for (int i = 1; i <= imageCounter; i++) {
-            nombresImagenes.add(nombreProducto + "imagen" + i);
+            nombresImagenes.add(nombreProducto.getText().toString() + "imagen" + i);
         }
         return nombresImagenes;
     }
