@@ -47,11 +47,11 @@
             android:exported="true"/>
 
         <activity
-            android:name=".Capturar"
+            android:name=".Lista"
             android:exported="true"/>
 
         <activity
-            android:name=".Lista"
+            android:name=".Capturar"
             android:exported="true">
 
 
