@@ -52,12 +52,11 @@
             android:textSize="20sp"
             android:textAlignment="center"/>
 
-
-
-        <ImageView
+        <LinearLayout
             android:id="@+id/ImagenPreview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:layout_below="@id/editCantidad"
             android:layout_marginTop="20dp"/>
 
@@ -67,7 +66,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/ImagenPreview"
             android:layout_marginTop="20dp"
-            android:text="Subir Imagen" />
+            android:text="Seleccionar imagenes" />
 
         <Button
             android:id="@+id/btninsert"
@@ -75,7 +74,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/avisoCampoVacio"
             android:layout_marginTop="20dp"
-            android:text="Aceptar alv" />
+            android:text="Subir datos" />
 
         <Button
             android:id="@+id/btnview"
@@ -83,7 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/btninsert"
             android:layout_marginTop="20dp"
-            android:text="ver productos" />
+            android:text="Ver Productos" />
 
     </RelativeLayout>
 </ScrollView>

@@ -2,6 +2,7 @@ package com.example.civiv;
 
 
 import android.content.Intent;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +47,7 @@ import java.util.UUID;
 public class InsertarProductos extends AppCompatActivity {
     Button btnInsert, btnView, btnSeleccionarImagen;
     EditText nombreProducto, Cantidad;
-    ImageView ImagenPreview;
+    LinearLayout ImagenPreview;
     DatabaseReference databaseProductos;
     StorageReference storageReference;
     Uri image;
@@ -56,10 +58,28 @@ public class InsertarProductos extends AppCompatActivity {
         @Override
         public void onActivityResult(ActivityResult result) {
             if (result.getResultCode() == RESULT_OK) {
+                ImagenPreview.removeAllViews();
                 if (result.getData() != null) {
-                    image = result.getData().getData();
-                    productImages.add(image);
-                    Glide.with(getApplicationContext()).load(image).into(ImagenPreview);
+                    // Verificar si se seleccionaron múltiples imágenes
+                    if (result.getData().getClipData() != null) {
+                        int count = result.getData().getClipData().getItemCount();
+                        for (int i = 0; i < count; i++) {
+                            Uri imageUri = result.getData().getClipData().getItemAt(i).getUri();
+                            if (imageUri != null) {
+                                productImages.add(imageUri);
+                            }
+                        }
+                    } else if (result.getData().getData() != null) {
+                        // Si se selecciona una sola imagen
+                        Uri imageUri = result.getData().getData();
+                        if (imageUri != null) {
+                            productImages.add(imageUri);
+                        }
+                    }
+
+                    // Actualizar la vista previa de la imagen y verificar los campos vacíos
+
+                    updateImagePreview();
                     checkFieldsForEmptyValues();
                 } else {
                     Toast.makeText(InsertarProductos.this, "Selecciona una imagen", Toast.LENGTH_SHORT).show();
@@ -98,6 +118,7 @@ public class InsertarProductos extends AppCompatActivity {
         btnSeleccionarImagen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ImagenPreview.removeAllViews();
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
@@ -157,7 +178,7 @@ public class InsertarProductos extends AppCompatActivity {
         String cantidad = Cantidad.getText().toString().trim();
 
         if (producto != null && cantidad != null) {
-            if (!TextUtils.isEmpty(producto) && !TextUtils.isEmpty(cantidad) && image != null) {
+            if (!TextUtils.isEmpty(producto) && !TextUtils.isEmpty(cantidad) && !productImages.isEmpty()) {
                 btnInsert.setEnabled(true);
             } else {
                 btnInsert.setEnabled(false);
@@ -170,21 +191,22 @@ public class InsertarProductos extends AppCompatActivity {
     private void clearFields() {
         nombreProducto.setText("");
         Cantidad.setText("");
-        ImagenPreview.setImageResource(android.R.color.transparent);
+        ImagenPreview.removeAllViews();
         productImages.clear();
         imageCounter = 1;
     }
 
 
     private void uploadMultipleImages(List<Uri> images, String Producto) {
-        for (Uri imageUri : images) {
-            StorageReference reference = storageReference.child("images/" + Producto + "imagen" + imageCounter);
+        for (int i = 0; i < images.size(); i++) {
+            Uri imageUri = images.get(i);
+            StorageReference reference = storageReference.child("images/" + Producto + "imagen" + (i+1));
             reference.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     // Image uploaded successfully
-                    imageCounter++;
                     Toast.makeText(InsertarProductos.this, "Imagen subida", Toast.LENGTH_SHORT).show();
+                    // Puedes eliminar el incremento de imageCounter aquí
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -222,11 +244,12 @@ public class InsertarProductos extends AppCompatActivity {
 
     private List<String> obtenerNombreDeImagenes() {
         List<String> nombresImagenes = new ArrayList<>();
-        for (int i = 1; i <= imageCounter; i++) {
+        for (int i = 1; i <= productImages.size(); i++) {
             nombresImagenes.add(nombreProducto.getText().toString() + "imagen" + i);
         }
         return nombresImagenes;
     }
+
 
 
 
@@ -243,5 +266,22 @@ public class InsertarProductos extends AppCompatActivity {
             }
         }});
     }
+
+    private void updateImagePreview() {
+        // Clear previous images
+        ImagenPreview.removeAllViews();
+
+        // Load each selected image into ImageView
+        for (Uri imageUri : productImages) {
+            ImageView imageView = new ImageView(this);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.setMargins(8, 8, 8, 8);
+            imageView.setLayoutParams(layoutParams);
+            Glide.with(getApplicationContext()).load(imageUri).into(imageView);
+            ImagenPreview.addView(imageView);
+        }
+    }
+
+
 }
 
