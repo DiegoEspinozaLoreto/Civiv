@@ -40,6 +40,7 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -109,9 +110,7 @@ public class InsertarProductos extends AppCompatActivity {
         btnInsert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InsertData();
                 uploadMultipleImages(productImages, nombreProducto.getText().toString());
-                clearFields();
             }
         });
 
@@ -193,26 +192,31 @@ public class InsertarProductos extends AppCompatActivity {
         Cantidad.setText("");
         ImagenPreview.removeAllViews();
         productImages.clear();
-        imageCounter = 1;
     }
 
 
-    private void uploadMultipleImages(List<Uri> images, String Producto) {
+
+    private void uploadMultipleImages(List<Uri> images, final String producto) {
+        final List<String> imageUrls = new ArrayList<>(Collections.nCopies(images.size(), null));  // Inicializa con nulls
         for (int i = 0; i < images.size(); i++) {
-            Uri imageUri = images.get(i);
-            StorageReference reference = storageReference.child("images/" + Producto + "imagen" + (i+1));
+            final int index = i;  // Guarda el índice actual
+            final Uri imageUri = images.get(i);
+            final StorageReference reference = storageReference.child("images/" + producto + "_imagen" + UUID.randomUUID().toString());
+
             reference.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // Image uploaded successfully
-                    Toast.makeText(InsertarProductos.this, "Imagen subida", Toast.LENGTH_SHORT).show();
-                    // Puedes eliminar el incremento de imageCounter aquí
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    // Handle image upload failure
-                    Toast.makeText(InsertarProductos.this, "Error al subir imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            imageUrls.set(index, uri.toString());  // Establece la URL en la posición correcta
+                            // Verifica si todas las posiciones están llenas (no null)
+                            if (!imageUrls.contains(null)) {
+                                InsertData(producto, Cantidad.getText().toString(), imageUrls);
+                                clearFields();
+                            }
+                        }
+                    });
                 }
             });
         }
@@ -222,25 +226,25 @@ public class InsertarProductos extends AppCompatActivity {
 
 
 
-    private void InsertData() {
-        String productosProducto = nombreProducto.getText().toString();
-        String productosCantidad = Cantidad.getText().toString();
-        String id = databaseProductos.push().getKey();
-        List<String> imagenes = obtenerNombreDeImagenes();
 
-        Productoss productoss = new Productoss(id, productosProducto, productosCantidad, imagenes);
+
+    private void InsertData(String nombreProducto, String cantidadProducto, List<String> imageUrls) {
+        String id = databaseProductos.push().getKey();
+        Productoss productoss = new Productoss(id, nombreProducto, cantidadProducto, imageUrls);
         databaseProductos.child("productos").child(id).setValue(productoss)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(InsertarProductos.this, "Producto insertado", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(InsertarProductos.this, "Producto insertado correctamente.", Toast.LENGTH_SHORT).show();
+                            clearFields();
                         } else {
-                            Toast.makeText(InsertarProductos.this, "Error al insertar producto", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(InsertarProductos.this, "Error al insertar producto.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
+
 
     private List<String> obtenerNombreDeImagenes() {
         List<String> nombresImagenes = new ArrayList<>();
