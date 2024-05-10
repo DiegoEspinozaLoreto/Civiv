@@ -2,8 +2,8 @@ package com.example.civiv;
 
 
 import android.content.Intent;
-import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -11,13 +11,16 @@ import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
+
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -25,18 +28,17 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
+
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
-import com.bumptech.glide.Glide;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
@@ -54,6 +56,9 @@ public class InsertarProductos extends AppCompatActivity {
     Uri image;
     List<Uri> productImages = new ArrayList<>();
     int imageCounter = 1;
+
+    Toolbar toolbar;
+
 
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -101,12 +106,28 @@ public class InsertarProductos extends AppCompatActivity {
         Cantidad = findViewById(R.id.editCantidad);
         databaseProductos = FirebaseDatabase.getInstance().getReference();
         storageReference = FirebaseStorage.getInstance().getReference();
+        toolbar = findViewById(R.id.toolbar);
+
 
         btnInsert.setEnabled(false);
         addNumberInputFilter(Cantidad);
         Cantidad.setInputType(InputType.TYPE_CLASS_NUMBER);
         btnSeleccionarImagen.setEnabled(false);
 
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            ((Window) window).addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(R.color.dots_background));
+        }
+
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back_white);
+        }
         btnInsert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -129,7 +150,7 @@ public class InsertarProductos extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(InsertarProductos.this, ProductoList.class));
-                finish();
+
             }
         });
 
@@ -171,6 +192,8 @@ public class InsertarProductos extends AppCompatActivity {
             }
         });
     }
+
+
 
     private void checkFieldsForEmptyValues() {
         String producto = nombreProducto.getText().toString().trim();
@@ -286,6 +309,15 @@ public class InsertarProductos extends AppCompatActivity {
         }
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish(); // Finaliza la actividad y regresa
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
 }
 
