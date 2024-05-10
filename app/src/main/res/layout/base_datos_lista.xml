@@ -10,10 +10,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/dots_background"
+            app:title="Insertar Producto"
+            app:titleTextColor="@android:color/white" />
+
         <TextView
             android:id="@+id/textView5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/toolbar"
             android:layout_marginTop="30dp"
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
