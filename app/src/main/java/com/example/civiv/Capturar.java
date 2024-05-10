@@ -3,6 +3,10 @@ package com.example.civiv;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,18 +18,16 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.civiv.ml.ModeloPrueba;
-
-import org.tensorflow.lite.support.image.TensorImage;
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
-
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 
 public class Capturar extends AppCompatActivity {
     Bitmap bitmap;
+    Yolo8TFLiteDetector yolo8TFLiteDetector;
+
+    Paint boxPaint = new Paint();
+    Paint textPaint = new Paint();
+
 
     public Button capturarBtn;
     public Button cargarBtn;
@@ -44,6 +46,19 @@ public class Capturar extends AppCompatActivity {
         cargarBtn = (Button) findViewById(R.id.cargarButton);
         Imagen = (ImageView) findViewById(R.id.imageView);
 
+        yolo8TFLiteDetector = new Yolo8TFLiteDetector();
+        yolo8TFLiteDetector.setModelFile("yolov5m");
+        System.out.println("Si seteo el modelo");
+        yolo8TFLiteDetector.initialModel(this);
+
+        boxPaint.setStrokeWidth(5);
+        boxPaint.setStyle(Paint.Style.STROKE);
+        boxPaint.setColor(Color.RED);
+
+        textPaint.setTextSize(50);
+        textPaint.setColor(Color.GREEN);
+        textPaint.setStyle(Paint.Style.FILL);
+
 
         cargarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,45 +73,28 @@ public class Capturar extends AppCompatActivity {
         capturarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    ModeloPrueba model = ModeloPrueba.newInstance(Capturar.this);
-                    if (bitmap !=null){
-                        bitmap = Bitmap.createScaledBitmap(bitmap,300,300,true);
-                        // Creates inputs for reference.
-                        TensorImage image = TensorImage.fromBitmap(bitmap);
 
-                        // Runs model inference and gets result.
-                        ModeloPrueba.Outputs outputs = model.process(image);
-                        TensorBuffer locations = outputs.getLocationsAsTensorBuffer();
-                        TensorBuffer classes = outputs.getClassesAsTensorBuffer();
-                        TensorBuffer scores = outputs.getScoresAsTensorBuffer();
-                        TensorBuffer numberOfDetections = outputs.getNumberOfDetectionsAsTensorBuffer();
+                ArrayList<Recognition>recognitions = yolo8TFLiteDetector.detect(bitmap);
+                Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888,true);
+                Canvas canvas = new Canvas(mutableBitmap);
 
-                        // Releases model resources if no longer used.
-                        model.close();
-                        Toast.makeText(Capturar.this, "Si jaló: ", Toast.LENGTH_SHORT).show();
-                        System.out.println(getMax(classes.getFloatArray())+" ");
+                for (Recognition recognition: recognitions){
+                    System.out.println(recognition);
+                    if(recognition.getConfidence()>0.1){
+                        RectF location = recognition.getLocation();
+                        canvas.drawRect(location,boxPaint);
+                        canvas.drawText(recognition.getLabelName()+":"+recognition.getConfidence(),location.left,location.top,textPaint);
                     }
-                    else{
-                        Toast.makeText(Capturar.this, "JOTO", Toast.LENGTH_SHORT).show();
-                    }
-
-                } catch (IOException e) {
-                    Toast.makeText(Capturar.this, "No jaló: "+e, Toast.LENGTH_SHORT).show();
                 }
+                Imagen.setImageBitmap(mutableBitmap);
 
             }
+
         });
     }
 
 
-    int getMax(float[]arr){
-        int max = 0;
-        for (int i =0; i < arr.length;i++){
-            if (arr[i]>arr[max]) max = i;
-        }
-        return max;
-    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

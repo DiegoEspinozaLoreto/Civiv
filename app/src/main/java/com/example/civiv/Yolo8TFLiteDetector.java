@@ -67,6 +67,7 @@ public class Yolo8TFLiteDetector {
     }
 
     public void setModelFile(String modelFile){
+
         switch (modelFile) {
             case "yolov5s":
                 IS_INT8 = false;
@@ -79,6 +80,7 @@ public class Yolo8TFLiteDetector {
             case "yolov5m":
                 IS_INT8 = false;
                 MODEL_FILE = MODEL_YOLOV5M;
+                System.out.println("SI AGARRO EL MEDIUM");
                 break;
             case "yolov5s-int8":
                 IS_INT8 = true;
@@ -86,6 +88,7 @@ public class Yolo8TFLiteDetector {
                 break;
             default:
                 Log.i("tfliteSupport", "Only yolov5s/n/m/sint8 can be load!");
+                System.out.println("MAMO");
         }
     }
 
