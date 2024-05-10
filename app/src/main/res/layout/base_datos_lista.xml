@@ -45,7 +45,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Complete todos los campos y seleccione una imagen para continuar"
+            android:text="Complete todos los campos y luego seleccione una imagen para continuar"
             android:id="@+id/avisoCampoVacio"
             android:layout_below="@+id/btnSeleccionarImagen"
             android:layout_marginTop="20dp"
