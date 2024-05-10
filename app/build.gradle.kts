@@ -37,6 +37,7 @@ android {
     }
     buildFeatures {
         mlModelBinding = true
+
     }
 }
 
@@ -45,21 +46,17 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("org.tensorflow:tensorflow-lite-support:0.1.0")
-    implementation("org.tensorflow:tensorflow-lite-metadata:0.1.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.3")
+    implementation("org.tensorflow:tensorflow-lite-metadata:0.4.3")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-
     //DataBase Dependenciesn= (Firebase)
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
     implementation("com.google.firebase:firebase-analytics")
 
     //Firebase Authentication (Users & Passwords)
     implementation ("com.google.firebase:firebase-auth:22.3.1")
-
-    //TensorFlow
-
 
 
     // Import the GPU delegate plugin Library for GPU inference
