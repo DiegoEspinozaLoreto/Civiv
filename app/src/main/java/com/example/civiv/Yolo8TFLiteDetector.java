@@ -3,18 +3,14 @@ package com.example.civiv;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
-import android.os.Binder;
 import android.os.Build;
 import android.util.Log;
 import android.util.Size;
 import android.widget.Toast;
 
-//import org.checkerframework.checker.nullness.Opt;
-import org.checkerframework.checker.units.qual.C;
+
 import org.tensorflow.lite.DataType;
-import org.tensorflow.lite.Delegate;
 import org.tensorflow.lite.Interpreter;
-import org.tensorflow.lite.InterpreterFactory;
 import org.tensorflow.lite.gpu.GpuDelegate;
 import org.tensorflow.lite.gpu.CompatibilityList;
 import org.tensorflow.lite.nnapi.NnApiDelegate;
@@ -29,7 +25,6 @@ import org.tensorflow.lite.support.image.TensorImage;
 import org.tensorflow.lite.support.image.ops.ResizeOp;
 import org.tensorflow.lite.support.metadata.MetadataExtractor;
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
-import org.tensorflow.lite.support.metadata.MetadataParser;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -42,18 +37,17 @@ import java.util.PriorityQueue;
 
 public class Yolo8TFLiteDetector {
 
-    private final Size INPNUT_SIZE = new Size(640, 640);
-    private final int[] OUTPUT_SIZE = new int[]{1, 8, 8400};
+    private final Size INPNUT_SIZE = new Size(320, 320);
+    private final int[] OUTPUT_SIZE = new int[]{1, 6300, 9};
     private Boolean IS_INT8 = false;
     private final float DETECT_THRESHOLD = 0.25f;
     private final float IOU_THRESHOLD = 0.45f;
     private final float IOU_CLASS_DUPLICATED_THRESHOLD = 0.7f;
-    private final String MODEL_YOLOV5S = "yolov5s-fp16-320-metadata.tflite";
-    //    private final String MODEL_YOLOV5S = "yolov5s-dynamic.tflite";
-    private final String MODEL_YOLOV5N =  "yolov5n-fp16-320.tflite";
-    private final String MODEL_YOLOV5M = "yolov5m-fp16-320.tflite";
-    private final String MODEL_YOLOV5S_INT8 = "yolov5s-int8-320.tflite";
+
     private final String LABEL_FILE = "labels.txt";
+
+    private int BITMAP_HEIGHT;
+    private int BITMAP_WIDTH;
     MetadataExtractor.QuantizationParams input5SINT8QuantParams = new MetadataExtractor.QuantizationParams(0.003921568859368563f, 0);
     MetadataExtractor.QuantizationParams output5SINT8QuantParams = new MetadataExtractor.QuantizationParams(0.006305381190031767f, 5);
     private String MODEL_FILE;
@@ -67,29 +61,10 @@ public class Yolo8TFLiteDetector {
     }
 
     public void setModelFile(String modelFile){
+        MODEL_FILE = modelFile;
+        System.out.println("OUTPUT: "+OUTPUT_SIZE[1]);
 
-        switch (modelFile) {
-            case "yolov5s":
-                IS_INT8 = false;
-                MODEL_FILE = MODEL_YOLOV5S;
-                break;
-            case "yolov5n":
-                IS_INT8 = false;
-                MODEL_FILE = MODEL_YOLOV5N;
-                break;
-            case "yolov5m":
-                IS_INT8 = false;
-                MODEL_FILE = MODEL_YOLOV5M;
-                System.out.println("SI AGARRO EL MEDIUM");
-                break;
-            case "yolov5s-int8":
-                IS_INT8 = true;
-                MODEL_FILE = MODEL_YOLOV5S_INT8;
-                break;
-            default:
-                Log.i("tfliteSupport", "Only yolov5s/n/m/sint8 can be load!");
-                System.out.println("MAMO");
-        }
+        Log.d(">>> ", "MODEL NAME SET --- "+ MODEL_FILE + ", "+modelFile);
     }
 
     public String getLabelFile() {
@@ -108,6 +83,7 @@ public class Yolo8TFLiteDetector {
         // Initialise the model
         try {
 
+            Log.d(">>> ", "loading model --- "+ MODEL_FILE);
             ByteBuffer tfliteModel = FileUtil.loadMappedFile(activity, MODEL_FILE);
             tflite = new Interpreter(tfliteModel, options);
             Log.i("tfliteSupport", "Success reading model: " + MODEL_FILE);
@@ -128,6 +104,9 @@ public class Yolo8TFLiteDetector {
      * @return
      */
     public ArrayList<Recognition> detect(Bitmap bitmap) {
+
+        BITMAP_HEIGHT = bitmap.getHeight();
+        BITMAP_WIDTH = bitmap.getWidth();
 
         // yolov5s-tflite的输入是:[1, 320, 320,3], 摄像头每一帧图片需要resize,再归一化
         TensorImage yolov5sTfliteInput;
@@ -165,6 +144,7 @@ public class Yolo8TFLiteDetector {
         // 推理计算
         if (null != tflite) {
             // 这里tflite默认会加一个batch=1的纬度
+            Log.d(">>> ", yolov5sTfliteInput.getTensorBuffer().getFlatSize() + " " + probabilityBuffer.getFlatSize());
             tflite.run(yolov5sTfliteInput.getBuffer(), probabilityBuffer.getBuffer());
         }
 
@@ -183,14 +163,14 @@ public class Yolo8TFLiteDetector {
         for (int i = 0; i < OUTPUT_SIZE[1]; i++) {
             int gridStride = i * OUTPUT_SIZE[2];
             // 由于yolov5作者在导出tflite的时候对输出除以了image size, 所以这里需要乘回去
-            float x = recognitionArray[0 + gridStride] * INPNUT_SIZE.getWidth();
-            float y = recognitionArray[1 + gridStride] * INPNUT_SIZE.getHeight();
-            float w = recognitionArray[2 + gridStride] * INPNUT_SIZE.getWidth();
-            float h = recognitionArray[3 + gridStride] * INPNUT_SIZE.getHeight();
+            float x = recognitionArray[0 + gridStride] * BITMAP_WIDTH;
+            float y = recognitionArray[1 + gridStride] * BITMAP_HEIGHT;
+            float w = recognitionArray[2 + gridStride] * BITMAP_WIDTH;
+            float h = recognitionArray[3 + gridStride] * BITMAP_HEIGHT;
             int xmin = (int) Math.max(0, x - w / 2.);
             int ymin = (int) Math.max(0, y - h / 2.);
-            int xmax = (int) Math.min(INPNUT_SIZE.getWidth(), x + w / 2.);
-            int ymax = (int) Math.min(INPNUT_SIZE.getHeight(), y + h / 2.);
+            int xmax = (int) Math.min(BITMAP_WIDTH, x + w / 2.);
+            int ymax = (int) Math.min(BITMAP_HEIGHT, y + h / 2.);
             float confidence = recognitionArray[4 + gridStride];
             float[] classScores = Arrays.copyOfRange(recognitionArray, 5 + gridStride, this.OUTPUT_SIZE[2] + gridStride);
 //            if(i % 1000 == 0){
@@ -225,7 +205,9 @@ public class Yolo8TFLiteDetector {
         // 更新label信息
         for(Recognition recognition : nmsFilterBoxDuplicationRecognitions){
             int labelId = recognition.getLabelId();
+            System.out.println("LID"+labelId);
             String labelName = associatedAxisLabels.get(labelId);
+            System.out.println("LNA: "+labelName);
             recognition.setLabelName(labelName);
         }
 
@@ -384,7 +366,7 @@ public class Yolo8TFLiteDetector {
         CompatibilityList compatibilityList = new CompatibilityList();
         if(compatibilityList.isDelegateSupportedOnThisDevice()){
             GpuDelegate.Options delegateOptions = compatibilityList.getBestOptionsForThisDevice();
-            GpuDelegate gpuDelegate = new GpuDelegate(delegateOptions);
+            GpuDelegate gpuDelegate = new GpuDelegate();
             options.addDelegate(gpuDelegate);
             Log.i("tfliteSupport", "using gpu delegate.");
         } else {
@@ -401,3 +383,4 @@ public class Yolo8TFLiteDetector {
     }
 
 }
+

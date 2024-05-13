@@ -2,10 +2,11 @@ package com.example.civiv;
 
 import android.graphics.RectF;
 
-
 public class Recognition {
 
-    /** Display name for the recognition. */
+    /**
+     * Display name for the recognition.
+     */
     private Integer labelId;
     private String labelName;
     private Float labelScore;
@@ -16,11 +17,13 @@ public class Recognition {
     private Float confidence;
 
 
-    /** Optional location within the source image for the location of the recognized object. */
+    /**
+     * Optional location within the source image for the location of the recognized object.
+     */
     private RectF location;
 
     public Recognition(
-            final int labelId, final String labelName, final Float labelScore,  final Float confidence, final RectF location) {
+            final int labelId, final String labelName, final Float labelScore, final Float confidence, final RectF location) {
         this.labelId = labelId;
         this.labelScore = labelScore;
         this.labelName = labelName;
@@ -36,7 +39,9 @@ public class Recognition {
         return labelName;
     }
 
-    public Float getLabelScore() {return labelScore;}
+    public Float getLabelScore() {
+        return labelScore;
+    }
 
     public Float getConfidence() {
         return confidence;
@@ -50,9 +55,13 @@ public class Recognition {
         this.location = location;
     }
 
-    public void setLabelName(String labelName) {this.labelName = labelName;}
+    public void setLabelName(String labelName) {
+        this.labelName = labelName;
+    }
 
-    public void setLabelId(int labelId) {this.labelId = labelId;}
+    public void setLabelId(int labelId) {
+        this.labelId = labelId;
+    }
 
     public void setLabelScore(Float labelScore) {
         this.labelScore = labelScore;
@@ -83,3 +92,4 @@ public class Recognition {
         return resultString.trim();
     }
 }
+

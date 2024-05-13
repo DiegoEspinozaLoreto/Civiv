@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Capturar extends AppCompatActivity {
     Bitmap bitmap;
@@ -47,8 +48,7 @@ public class Capturar extends AppCompatActivity {
         Imagen = (ImageView) findViewById(R.id.imageView);
 
         yolo8TFLiteDetector = new Yolo8TFLiteDetector();
-        yolo8TFLiteDetector.setModelFile("yolov5m");
-        System.out.println("Si seteo el modelo");
+        yolo8TFLiteDetector.setModelFile("yolobest-fp16.tflite");
         yolo8TFLiteDetector.initialModel(this);
 
         boxPaint.setStrokeWidth(5);
@@ -65,7 +65,7 @@ public class Capturar extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(Capturar.this, "Le picó a cargar", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_GET_CONTENT);
+                intent.setAction(Intent.ACTION_PICK);
                 intent.setType("image/*");
                 startActivityForResult(intent,10);
             }
@@ -77,15 +77,21 @@ public class Capturar extends AppCompatActivity {
                 ArrayList<Recognition>recognitions = yolo8TFLiteDetector.detect(bitmap);
                 Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888,true);
                 Canvas canvas = new Canvas(mutableBitmap);
-
+                int contmouse =0;
                 for (Recognition recognition: recognitions){
                     System.out.println(recognition);
-                    if(recognition.getConfidence()>0.1){
+                    if(recognition.getConfidence()>0.4){
                         RectF location = recognition.getLocation();
+                        if (Objects.equals(recognition.getLabelName(), "Mouse Negro")){
+                            contmouse++;
+                            System.out.println("recognition: "+recognition.getLabelName());
+
+                        }
                         canvas.drawRect(location,boxPaint);
                         canvas.drawText(recognition.getLabelName()+":"+recognition.getConfidence(),location.left,location.top,textPaint);
                     }
                 }
+                System.out.println("mouse negro: "+contmouse);
                 Imagen.setImageBitmap(mutableBitmap);
 
             }
