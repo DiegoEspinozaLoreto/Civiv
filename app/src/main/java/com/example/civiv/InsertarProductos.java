@@ -35,6 +35,8 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -53,6 +55,14 @@ public class InsertarProductos extends AppCompatActivity {
     LinearLayout ImagenPreview;
     DatabaseReference databaseProductos;
     StorageReference storageReference;
+
+    FirebaseAuth firebaseAuth;
+
+    FirebaseUser user;
+
+    String userId;
+
+
     Uri image;
     List<Uri> productImages = new ArrayList<>();
     int imageCounter = 1;
@@ -107,6 +117,13 @@ public class InsertarProductos extends AppCompatActivity {
         databaseProductos = FirebaseDatabase.getInstance().getReference();
         storageReference = FirebaseStorage.getInstance().getReference();
         toolbar = findViewById(R.id.toolbar);
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        user = firebaseAuth.getCurrentUser();
+
+        if (user != null) {
+             userId = user.getUid(); // Este es el ID único del usuario autenticado
+        }
 
 
         btnInsert.setEnabled(false);
@@ -224,7 +241,7 @@ public class InsertarProductos extends AppCompatActivity {
         for (int i = 0; i < images.size(); i++) {
             final int index = i;  // Guarda el índice actual
             final Uri imageUri = images.get(i);
-            final StorageReference reference = storageReference.child("images/" + producto + "_imagen" + UUID.randomUUID().toString());
+            final StorageReference reference = storageReference.child(userId+"images/" + producto + "_imagen" + UUID.randomUUID().toString());
 
             reference.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -235,7 +252,7 @@ public class InsertarProductos extends AppCompatActivity {
                             imageUrls.set(index, uri.toString());  // Establece la URL en la posición correcta
                             // Verifica si todas las posiciones están llenas (no null)
                             if (!imageUrls.contains(null)) {
-                                InsertData(producto, Cantidad.getText().toString(), imageUrls);
+                                InsertData(producto, Cantidad.getText().toString(), imageUrls, userId);
                                 clearFields();
                             }
                         }
@@ -251,10 +268,10 @@ public class InsertarProductos extends AppCompatActivity {
 
 
 
-    private void InsertData(String nombreProducto, String cantidadProducto, List<String> imageUrls) {
+    private void InsertData(String nombreProducto, String cantidadProducto, List<String> imageUrls, String userId) {
         String id = databaseProductos.push().getKey();
-        Productoss productoss = new Productoss(id, nombreProducto, cantidadProducto, imageUrls);
-        databaseProductos.child("productos").child(id).setValue(productoss)
+        Productoss productoss = new Productoss(id, nombreProducto, cantidadProducto, imageUrls, userId);
+        databaseProductos.child("productos").child(userId).child(id).setValue(productoss)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -267,6 +284,7 @@ public class InsertarProductos extends AppCompatActivity {
                     }
                 });
     }
+
 
 
     private List<String> obtenerNombreDeImagenes() {

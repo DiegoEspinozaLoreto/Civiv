@@ -9,16 +9,27 @@ public class Productoss {
     private String nombreProducto;
     private String cantidad;
     private List<String> imageUrls;
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
 
     public Productoss() {
         // Constructor vacío requerido para Firebase
     }
 
-    public Productoss(String id, String nombreProducto, String cantidad, List<String> imageUrls) {
+    public Productoss(String id, String nombreProducto, String cantidad, List<String> imageUrls, String userId) {
         this.id = id;
         this.nombreProducto = nombreProducto;
         this.cantidad = cantidad;
         this.imageUrls = imageUrls;
+        this.userId = userId;
     }
 
     public String getId() {
