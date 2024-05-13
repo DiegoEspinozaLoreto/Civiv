@@ -36,11 +36,7 @@ public class Home extends AppCompatActivity implements View.OnClickListener {
 
             capturar = (Button) findViewById(R.id.capturarButton);
             capturar.setOnClickListener(this::onClick);
-        }
-            b = (ImageButton) findViewById(R.id.regresarMenuButton);
-            b.setOnClickListener(this);
-            calc = (ImageButton) findViewById(R.id.btn_calc1);
-            calc.setOnClickListener(this);
+
             btnProducto = (Button) findViewById(R.id.btnProductos);
             btnProducto.setOnClickListener(this);
 
@@ -50,7 +46,7 @@ public class Home extends AppCompatActivity implements View.OnClickListener {
                 window.setStatusBarColor(getResources().getColor(R.color.dots_background));
             }
 
-    }
+        }
 
     @Override
     public void onClick(View v) {
@@ -68,13 +64,8 @@ public class Home extends AppCompatActivity implements View.OnClickListener {
                 startActivity(transicion);
             }
 
-            }
 
-            if  (v.getId()== R.id.btn_calc1){
-                Intent transicion_calc = new Intent(Home.this, calculadora.class);
-                startActivity(transicion_calc);
 
-            }
 
             if(v.getId()== R.id.btnProductos){
                 Intent transicion = new Intent(Home.this, InsertarProductos.class);

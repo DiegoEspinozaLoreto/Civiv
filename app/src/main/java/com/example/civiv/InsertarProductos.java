@@ -139,7 +139,7 @@ public class InsertarProductos extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ImagenPreview.removeAllViews();
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 activityResultLauncher.launch(Intent.createChooser(intent, "Selecciona las imagenes"));

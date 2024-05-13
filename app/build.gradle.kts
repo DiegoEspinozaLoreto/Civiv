@@ -38,6 +38,7 @@ android {
     buildFeatures {
         mlModelBinding = true
 
+        
     }
 }
 
