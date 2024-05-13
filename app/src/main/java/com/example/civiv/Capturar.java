@@ -67,7 +67,6 @@ public class Capturar extends AppCompatActivity {
         cargarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(Capturar.this, "Le picó a cargar", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_PICK);
                 intent.setType("image/*");
@@ -87,26 +86,30 @@ public class Capturar extends AppCompatActivity {
         capturarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(bitmap!=null){
+                    ArrayList<Recognition>recognitions = yolo8TFLiteDetector.detect(bitmap);
+                    Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888,true);
+                    Canvas canvas = new Canvas(mutableBitmap);
+                    int contmouse =0;
+                    for (Recognition recognition: recognitions){
+                        System.out.println(recognition);
+                        if(recognition.getConfidence()>0.4){
+                            RectF location = recognition.getLocation();
+                            if (Objects.equals(recognition.getLabelName(), "Mouse Negro")){
+                                contmouse++;
+                                System.out.println("recognition: "+recognition.getLabelName());
 
-                ArrayList<Recognition>recognitions = yolo8TFLiteDetector.detect(bitmap);
-                Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888,true);
-                Canvas canvas = new Canvas(mutableBitmap);
-                int contmouse =0;
-                for (Recognition recognition: recognitions){
-                    System.out.println(recognition);
-                    if(recognition.getConfidence()>0.4){
-                        RectF location = recognition.getLocation();
-                        if (Objects.equals(recognition.getLabelName(), "Mouse Negro")){
-                            contmouse++;
-                            System.out.println("recognition: "+recognition.getLabelName());
-
+                            }
+                            canvas.drawRect(location,boxPaint);
+                            canvas.drawText(recognition.getLabelName()+":"+recognition.getConfidence(),location.left,location.top,textPaint);
                         }
-                        canvas.drawRect(location,boxPaint);
-                        canvas.drawText(recognition.getLabelName()+":"+recognition.getConfidence(),location.left,location.top,textPaint);
                     }
+                    System.out.println("mouse negro: "+contmouse);
+                    Imagen.setImageBitmap(mutableBitmap);
+                }else {
+                    Toast.makeText(Capturar.this, "Carga una imagen primero", Toast.LENGTH_SHORT).show();
                 }
-                System.out.println("mouse negro: "+contmouse);
-                Imagen.setImageBitmap(mutableBitmap);
+
 
             }
 
