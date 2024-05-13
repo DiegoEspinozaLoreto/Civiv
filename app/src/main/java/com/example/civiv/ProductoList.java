@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,6 +29,7 @@ public class ProductoList extends AppCompatActivity {
     MyAdapter adapter;
     Toolbar toolbar;
 
+    String userId;
 
     @Override
     public void onBackPressed() {
@@ -40,10 +42,11 @@ public class ProductoList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_producto_list);
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         recyclerView = findViewById(R.id.RecyclerView); // Corregir la inicialización aquí
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("productos");
+        databaseReference = FirebaseDatabase.getInstance().getReference("productos").child(userId);
         list = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MyAdapter(this, list);
@@ -66,6 +69,7 @@ public class ProductoList extends AppCompatActivity {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                list.clear();
                 for(DataSnapshot dataSnapshot: snapshot.getChildren()){
                     Productoss productoss = dataSnapshot.getValue(Productoss.class);
                     list.add(productoss);
