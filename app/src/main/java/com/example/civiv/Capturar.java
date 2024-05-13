@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -35,6 +36,8 @@ public class Capturar extends AppCompatActivity {
 
     public ImageView Imagen;
 
+    public ImageButton back;
+
 
 
     @SuppressLint("MissingInflatedId")
@@ -45,6 +48,7 @@ public class Capturar extends AppCompatActivity {
 
         capturarBtn = (Button) findViewById(R.id.capturarButton);
         cargarBtn = (Button) findViewById(R.id.cargarButton);
+        back = (ImageButton) findViewById(R.id.regresarMenuButton);
         Imagen = (ImageView) findViewById(R.id.imageView);
 
         yolo8TFLiteDetector = new Yolo8TFLiteDetector();
@@ -70,6 +74,15 @@ public class Capturar extends AppCompatActivity {
                 startActivityForResult(intent,10);
             }
         });
+
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent transicion = new Intent(Capturar.this, Home.class);
+                startActivity(transicion);
+            }
+        });
+
         capturarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
