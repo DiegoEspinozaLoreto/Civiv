@@ -3,8 +3,11 @@ package com.example.civiv;
 import static java.lang.Thread.sleep;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -39,6 +42,12 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         editPassword = findViewById(R.id.editTextPasssword);
 
         mAuth = FirebaseAuth.getInstance();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            ((Window) window).addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(R.color.dots_background));
+        }
     }
 
     @Override
@@ -55,6 +64,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                                 // Inicia la actividad Home si el inicio de sesión es exitoso
                                 Intent transicion = new Intent(Login.this, Home.class);
                                 startActivity(transicion);
+
                             } else {
                                 // Muestra un mensaje de error si las credenciales son incorrectas
                                 Toast.makeText(Login.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
