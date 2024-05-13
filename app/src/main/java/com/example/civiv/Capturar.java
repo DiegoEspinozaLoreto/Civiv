@@ -80,6 +80,7 @@ public class Capturar extends AppCompatActivity {
             public void onClick(View v) {
                 Intent transicion = new Intent(Capturar.this, Home.class);
                 startActivity(transicion);
+                finish();
             }
         });
 
