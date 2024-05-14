@@ -1,8 +1,9 @@
 package com.example.civiv;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Productoss {
+public class Productoss implements Serializable {
 
 
     private String id;

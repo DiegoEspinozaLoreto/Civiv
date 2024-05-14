@@ -1,7 +1,6 @@
 package com.example.civiv;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -17,19 +16,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.database.DatabaseReference.CompletionListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,15 +33,8 @@ public class Capturar extends AppCompatActivity {
 
     public Button capturarBtn;
     public Button cargarBtn;
-
     public ImageView Imagen;
-
     public ImageButton back;
-
-    DatabaseReference databaseProductos;
-    FirebaseAuth firebaseAuth;
-    FirebaseUser user;
-    String userId;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -77,14 +58,6 @@ public class Capturar extends AppCompatActivity {
         textPaint.setTextSize(50);
         textPaint.setColor(Color.GREEN);
         textPaint.setStyle(Paint.Style.FILL);
-
-        firebaseAuth = FirebaseAuth.getInstance();
-        user = firebaseAuth.getCurrentUser();
-        if (user != null) {
-            userId = user.getUid();
-        }
-
-        databaseProductos = FirebaseDatabase.getInstance().getReference("productos");
 
         cargarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,8 +100,19 @@ public class Capturar extends AppCompatActivity {
                         }
                     }
 
-                    // Mostrar el conteo y preguntar al usuario si desea actualizar la base de datos
-                    showUpdateDialog(productCounts);
+                    // Crear lista de productos reconocidos
+                    ArrayList<Productoss> productosReconocidos = new ArrayList<>();
+                    for (Map.Entry<String, Integer> entry : productCounts.entrySet()) {
+                        Productoss producto = new Productoss();
+                        producto.setNombreProducto(entry.getKey());
+                        producto.setCantidad(String.valueOf(entry.getValue()));
+                        productosReconocidos.add(producto);
+                    }
+
+                    // Iniciar ReconocidosActivity con la lista de productos reconocidos
+                    Intent intent = new Intent(Capturar.this, ReconocidosActivity.class);
+                    intent.putExtra("productosReconocidos", productosReconocidos);
+                    startActivity(intent);
 
                     Imagen.setImageBitmap(mutableBitmap);
                 } else {
@@ -136,67 +120,6 @@ public class Capturar extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private void showUpdateDialog(Map<String, Integer> productCounts) {
-        StringBuilder message = new StringBuilder();
-        for (Map.Entry<String, Integer> entry : productCounts.entrySet()) {
-            message.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Productos reconocidos")
-                .setMessage(message.toString())
-                .setPositiveButton("Actualizar", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        updateProductQuantities(productCounts);
-                    }
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
-    }
-
-    private void updateProductQuantities(Map<String, Integer> productCounts) {
-        final int[] updatesRemaining = {productCounts.size()};
-        for (Map.Entry<String, Integer> entry : productCounts.entrySet()) {
-            String productName = entry.getKey();
-            int quantity = entry.getValue();
-
-            findProductIdByName(productName, quantity, updatesRemaining);
-        }
-    }
-
-    private void findProductIdByName(String productName, int quantity, int[] updatesRemaining) {
-        databaseProductos.child(userId).orderByChild("nombreProducto").equalTo(productName)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            for (DataSnapshot productSnapshot : dataSnapshot.getChildren()) {
-                                String productId = productSnapshot.getKey();
-                                updateProductQuantity(productId, quantity, updatesRemaining);
-                            }
-                        } else {
-                            Toast.makeText(Capturar.this, "Producto no encontrado: " + productName, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        Toast.makeText(Capturar.this, "Error al buscar producto: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    private void updateProductQuantity(String productId, int quantity, int[] updatesRemaining) {
-        databaseProductos.child(userId).child(productId).child("cantidad").setValue(String.valueOf(quantity))
-                .addOnCompleteListener(task -> {
-                    updatesRemaining[0]--;
-                    if (updatesRemaining[0] == 0) {
-                        Toast.makeText(Capturar.this, "Base de datos actualizada", Toast.LENGTH_SHORT).show();
-                    }
-                });
     }
 
     @Override

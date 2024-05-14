@@ -61,6 +61,10 @@
         <activity android:name=".ProductoList"
             android:exported="true"/>
 
+        <activity android:name=".ReconocidosActivity"
+            android:exported="true"/>
+
+
     </application>
 
 </manifest>
