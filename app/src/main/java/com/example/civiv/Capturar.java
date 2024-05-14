@@ -8,9 +8,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -18,6 +22,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +42,7 @@ public class Capturar extends AppCompatActivity {
     public ImageView Imagen;
 
     public ImageButton back;
-
+    Toolbar toolbar;
 
 
     @SuppressLint("MissingInflatedId")
@@ -48,7 +53,6 @@ public class Capturar extends AppCompatActivity {
 
         capturarBtn = (Button) findViewById(R.id.capturarButton);
         cargarBtn = (Button) findViewById(R.id.cargarButton);
-        back = (ImageButton) findViewById(R.id.regresarMenuButton);
         Imagen = (ImageView) findViewById(R.id.imageView);
 
         yolo8TFLiteDetector = new Yolo8TFLiteDetector();
@@ -74,14 +78,6 @@ public class Capturar extends AppCompatActivity {
             }
         });
 
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent transicion = new Intent(Capturar.this, Home.class);
-                startActivity(transicion);
-                finish();
-            }
-        });
 
         capturarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,6 +105,20 @@ public class Capturar extends AppCompatActivity {
             }
 
         });
+
+        toolbar = findViewById(R.id.toolbar2);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            ((Window) window).addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(R.color.dots_background));
+        }
+
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back_white);
+        }
     }
 
 
@@ -128,5 +138,13 @@ public class Capturar extends AppCompatActivity {
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();  // Finaliza la actividad y regresa
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
