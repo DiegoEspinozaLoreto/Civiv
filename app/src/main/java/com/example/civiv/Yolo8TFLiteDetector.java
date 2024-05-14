@@ -38,7 +38,7 @@ import java.util.PriorityQueue;
 public class Yolo8TFLiteDetector {
 
     private final Size INPNUT_SIZE = new Size(320, 320);
-    private final int[] OUTPUT_SIZE = new int[]{1, 6300, 9};
+    private final int[] OUTPUT_SIZE = new int[]{1, 6300, 14};
     private Boolean IS_INT8 = false;
     private final float DETECT_THRESHOLD = 0.25f;
     private final float IOU_THRESHOLD = 0.45f;

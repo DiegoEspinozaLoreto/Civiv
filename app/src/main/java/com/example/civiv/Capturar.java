@@ -52,7 +52,7 @@ public class Capturar extends AppCompatActivity {
         Imagen = (ImageView) findViewById(R.id.imageView);
 
         yolo8TFLiteDetector = new Yolo8TFLiteDetector();
-        yolo8TFLiteDetector.setModelFile("yolobest-fp16.tflite");
+        yolo8TFLiteDetector.setModelFile("yolov5best-fp16.tflite");
         yolo8TFLiteDetector.initialModel(this);
 
         boxPaint.setStrokeWidth(5);
@@ -93,13 +93,8 @@ public class Capturar extends AppCompatActivity {
                     int contmouse =0;
                     for (Recognition recognition: recognitions){
                         System.out.println(recognition);
-                        if(recognition.getConfidence()>0.4){
+                        if(recognition.getConfidence()>0.1){
                             RectF location = recognition.getLocation();
-                            if (Objects.equals(recognition.getLabelName(), "Mouse Negro")){
-                                contmouse++;
-                                System.out.println("recognition: "+recognition.getLabelName());
-
-                            }
                             canvas.drawRect(location,boxPaint);
                             canvas.drawText(recognition.getLabelName()+":"+recognition.getConfidence(),location.left,location.top,textPaint);
                         }
