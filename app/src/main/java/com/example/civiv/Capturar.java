@@ -29,6 +29,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.DatabaseReference.CompletionListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -157,15 +158,16 @@ public class Capturar extends AppCompatActivity {
     }
 
     private void updateProductQuantities(Map<String, Integer> productCounts) {
+        final int[] updatesRemaining = {productCounts.size()};
         for (Map.Entry<String, Integer> entry : productCounts.entrySet()) {
             String productName = entry.getKey();
             int quantity = entry.getValue();
 
-            findProductIdByName(productName, quantity);
+            findProductIdByName(productName, quantity, updatesRemaining);
         }
     }
 
-    private void findProductIdByName(String productName, int quantity) {
+    private void findProductIdByName(String productName, int quantity, int[] updatesRemaining) {
         databaseProductos.child(userId).orderByChild("nombreProducto").equalTo(productName)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -173,7 +175,7 @@ public class Capturar extends AppCompatActivity {
                         if (dataSnapshot.exists()) {
                             for (DataSnapshot productSnapshot : dataSnapshot.getChildren()) {
                                 String productId = productSnapshot.getKey();
-                                updateProductQuantity(productId, quantity);
+                                updateProductQuantity(productId, quantity, updatesRemaining);
                             }
                         } else {
                             Toast.makeText(Capturar.this, "Producto no encontrado: " + productName, Toast.LENGTH_SHORT).show();
@@ -187,13 +189,12 @@ public class Capturar extends AppCompatActivity {
                 });
     }
 
-    private void updateProductQuantity(String productId, int quantity) {
+    private void updateProductQuantity(String productId, int quantity, int[] updatesRemaining) {
         databaseProductos.child(userId).child(productId).child("cantidad").setValue(String.valueOf(quantity))
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
+                    updatesRemaining[0]--;
+                    if (updatesRemaining[0] == 0) {
                         Toast.makeText(Capturar.this, "Base de datos actualizada", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(Capturar.this, "Error al actualizar la base de datos", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
