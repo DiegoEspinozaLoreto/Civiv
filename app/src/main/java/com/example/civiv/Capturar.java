@@ -18,11 +18,14 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +44,7 @@ public class Capturar extends AppCompatActivity {
 
     public ImageView Imagen;
 
-    public ImageButton back;
+    public ImageButton popUp;
     Toolbar toolbar;
 
 
@@ -66,6 +69,13 @@ public class Capturar extends AppCompatActivity {
         textPaint.setTextSize(50);
         textPaint.setColor(Color.GREEN);
         textPaint.setStyle(Paint.Style.FILL);
+        popUp = findViewById(R.id.popUpButton);
+        popUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopup(v);
+            }
+        });
 
 
         cargarBtn.setOnClickListener(new View.OnClickListener() {
@@ -123,7 +133,28 @@ public class Capturar extends AppCompatActivity {
 
 
 
+    private void showPopup(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.getMenuInflater().inflate(R.menu.menu_popup, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.menu_logout) {
+                    FirebaseAuth.getInstance().signOut();
+                    Toast.makeText(Capturar.this, "Sesión cerrada exitosamente", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(Capturar.this, Login.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                    return true;
+                } else {
+                    return false;
+                }
+            }
 
+        });
+        popup.show();
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(requestCode == 10){

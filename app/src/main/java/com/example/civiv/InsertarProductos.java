@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -55,6 +56,7 @@ public class InsertarProductos extends AppCompatActivity {
     LinearLayout ImagenPreview;
     DatabaseReference databaseProductos;
     StorageReference storageReference;
+    TextView aviso;
 
     FirebaseAuth firebaseAuth;
 
@@ -116,7 +118,9 @@ public class InsertarProductos extends AppCompatActivity {
         Cantidad = findViewById(R.id.editCantidad);
         databaseProductos = FirebaseDatabase.getInstance().getReference();
         storageReference = FirebaseStorage.getInstance().getReference();
-        toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar2);
+        aviso = findViewById(R.id.avisoCampoVacio);
+        aviso.setVisibility(View.INVISIBLE);
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
@@ -219,11 +223,14 @@ public class InsertarProductos extends AppCompatActivity {
         if (producto != null && cantidad != null) {
             if (!TextUtils.isEmpty(producto) && !TextUtils.isEmpty(cantidad) && !productImages.isEmpty()) {
                 btnInsert.setEnabled(true);
+                aviso.setVisibility(View.INVISIBLE);
             } else {
                 btnInsert.setEnabled(false);
+                aviso.setVisibility(View.VISIBLE);
             }
         } else {
             btnInsert.setEnabled(false);
+            aviso.setVisibility(View.VISIBLE);
         }
     }
 
