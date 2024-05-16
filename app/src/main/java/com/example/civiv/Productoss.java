@@ -1,25 +1,17 @@
 package com.example.civiv;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.List;
 
-public class Productoss implements Serializable {
-
+public class Productoss implements Parcelable {
 
     private String id;
     private String nombreProducto;
     private String cantidad;
     private List<String> imageUrls;
-    private String userId;
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
+    private String userId; // Asegúrate de tener este campo
 
     public Productoss() {
         // Constructor vacío requerido para Firebase
@@ -32,6 +24,26 @@ public class Productoss implements Serializable {
         this.imageUrls = imageUrls;
         this.userId = userId;
     }
+
+    protected Productoss(Parcel in) {
+        id = in.readString();
+        nombreProducto = in.readString();
+        cantidad = in.readString();
+        imageUrls = in.createStringArrayList();
+        userId = in.readString();
+    }
+
+    public static final Creator<Productoss> CREATOR = new Creator<Productoss>() {
+        @Override
+        public Productoss createFromParcel(Parcel in) {
+            return new Productoss(in);
+        }
+
+        @Override
+        public Productoss[] newArray(int size) {
+            return new Productoss[size];
+        }
+    };
 
     public String getId() {
         return id;
@@ -63,5 +75,27 @@ public class Productoss implements Serializable {
 
     public void setImageUrls(List<String> imageUrls) {
         this.imageUrls = imageUrls;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(nombreProducto);
+        dest.writeString(cantidad);
+        dest.writeStringList(imageUrls);
+        dest.writeString(userId);
     }
 }

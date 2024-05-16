@@ -1,97 +1,85 @@
 package com.example.civiv;
 
-import android.content.Intent;
-import android.os.Bundle;
+import android.content.Context;
+import android.graphics.Typeface;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class ReconocidosActivity extends AppCompatActivity {
+public class ReconocidosAdapter extends RecyclerView.Adapter<ReconocidosAdapter.MyViewHolder> {
 
-    RecyclerView recyclerView;
+    Context context;
     ArrayList<Productoss> list;
-    MyAdapter adapter;
-    String userId;
-    ImageView imageView;
-    Button btnUpdate, btnCancel;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reconocidos);
-
-        recyclerView = findViewById(R.id.recyclerViewReconocidos);
-        imageView = findViewById(R.id.imageView);
-        btnUpdate = findViewById(R.id.btnUpdate);
-        btnCancel = findViewById(R.id.btnCancel);
-
-        list = (ArrayList<Productoss>) getIntent().getSerializableExtra("productosReconocidos");
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MyAdapter(this, list);
-        recyclerView.setAdapter(adapter);
-
-        if (!list.isEmpty() && list.get(0).getImageUrls() != null && !list.get(0).getImageUrls().isEmpty()) {
-            String imageUrl = list.get(0).getImageUrls().get(0);
-            Glide.with(this).load(imageUrl).into(imageView);
-        }
-
-        btnUpdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateDatabase();
-            }
-        });
-
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();  // Regresa a la actividad anterior (Capturar)
-            }
-        });
+    public ReconocidosAdapter(Context context, ArrayList<Productoss> list) {
+        this.context = context;
+        this.list = list;
     }
 
-    private void updateDatabase() {
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("productos").child(userId);
+    @Override
+    public void onViewRecycled(@NonNull MyViewHolder holder) {
+        super.onViewRecycled(holder);
+        Glide.with(context).clear(holder.imagen);
+    }
 
-        for (Productoss producto : list) {
-            databaseReference.orderByChild("nombreProducto").equalTo(producto.getNombreProducto()).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                            dataSnapshot.getRef().child("cantidad").setValue(producto.getCantidad());
-                        }
-                    }
-                }
+    @NonNull
+    @Override
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(context).inflate(R.layout.productentry, parent, false);
+        return new MyViewHolder(v);
+    }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    // Manejar error
-                }
-            });
+    @Override
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        Productoss productoss = list.get(position);
+        setBoldText(holder.product, "Producto:", productoss.getNombreProducto());
+        setBoldText(holder.cantidad, "Cantidad:", productoss.getCantidad());
+
+        // Cargar la primera imagen disponible para el producto, si existe
+        if (productoss.getImageUrls() != null && !productoss.getImageUrls().isEmpty()) {
+            Glide.with(context)
+                    .load(productoss.getImageUrls().get(0)) // Asumimos que al menos una imagen está disponible
+                    .apply(new RequestOptions().override(100, 100)) // Ajusta el tamaño según tus necesidades
+                    .into(holder.imagen);
+        } else {
+            // Opcionalmente puedes poner una imagen predeterminada si no hay imágenes
+            holder.imagen.setImageResource(R.drawable.civiv2); // Coloca aquí tu imagen predeterminada
         }
+    }
 
-        Toast.makeText(ReconocidosActivity.this, "Base de datos actualizada", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(ReconocidosActivity.this, Capturar.class);
-        startActivity(intent);
-        finish();
+    @Override
+    public int getItemCount() {
+        return list.size();
+    }
+
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
+        TextView product, cantidad, id;
+        ImageView imagen; // Agregar ImageView
+
+        public MyViewHolder(@NonNull View itemView) {
+            super(itemView);
+            product = itemView.findViewById(R.id.textProduct);
+            cantidad = itemView.findViewById(R.id.textCantidad);
+            imagen = itemView.findViewById(R.id.imagenProducto); // Asegúrate de que este ID corresponde al ImageView en tu layout XML
+        }
+    }
+
+    private void setBoldText(TextView textView, String label, String value) {
+        SpannableStringBuilder spannable = new SpannableStringBuilder(label + "\n" + value);
+        spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        textView.setText(spannable);
     }
 }

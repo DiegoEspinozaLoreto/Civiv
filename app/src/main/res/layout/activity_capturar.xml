@@ -7,6 +7,14 @@
     android:background="#EAF2EF"
     tools:context=".MainActivity">
 
+    <ImageButton
+        android:id="@+id/regresarMenuButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_back_white"
+        android:contentDescription="back"
+        tools:ignore="MissingConstraints" />
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar2"
         android:layout_width="match_parent"
