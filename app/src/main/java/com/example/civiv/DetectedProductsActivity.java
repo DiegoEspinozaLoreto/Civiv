@@ -20,28 +20,30 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class ReconocidosActivity extends AppCompatActivity {
+public class DetectedProductsActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
     ArrayList<Productoss> list;
-    ReconocidosAdapter adapter;
+    DetectedProductsAdapter adapter;
     Button btnUpdate, btnCancel;
-    String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reconocidos);
+        setContentView(R.layout.activity_detected_products);
 
-        recyclerView = findViewById(R.id.recyclerViewReconocidos);
-        btnUpdate = findViewById(R.id.btnUpdate);
-        btnCancel = findViewById(R.id.btnCancel);
+        recyclerView = findViewById(R.id.recyclerViewDetectedProducts);
+        btnUpdate = findViewById(R.id.buttonUpdate);
+        btnCancel = findViewById(R.id.buttonCancel);
 
-        list = getIntent().getParcelableArrayListExtra("productosReconocidos");
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        // Obtener la lista de productos detectados del intent
+        list = getIntent().getParcelableArrayListExtra("detectedProducts");
+        if (list == null) {
+            list = new ArrayList<>();
+        }
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ReconocidosAdapter(this, list);
+        adapter = new DetectedProductsAdapter(this, list);
         recyclerView.setAdapter(adapter);
 
         btnUpdate.setOnClickListener(new View.OnClickListener() {
@@ -54,12 +56,14 @@ public class ReconocidosActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(DetectedProductsActivity.this, "Operación cancelada", Toast.LENGTH_SHORT).show();
                 finish();
             }
         });
     }
 
     private void updateDatabase() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("productos").child(userId);
 
         for (Productoss producto : list) {
@@ -71,19 +75,19 @@ public class ReconocidosActivity extends AppCompatActivity {
                             String productId = dataSnapshot.getKey();
                             databaseReference.child(productId).child("cantidad").setValue(producto.getCantidad());
                         }
-                        Toast.makeText(ReconocidosActivity.this, "Base de datos actualizada.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetectedProductsActivity.this, "Base de datos actualizada.", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    // Handle error
+                    // Manejar el error
                 }
             });
         }
 
-        // Return to Capturar activity
-        Intent intent = new Intent(ReconocidosActivity.this, Capturar.class);
+        // Volver a Capturar activity
+        Intent intent = new Intent(DetectedProductsActivity.this, Capturar.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }

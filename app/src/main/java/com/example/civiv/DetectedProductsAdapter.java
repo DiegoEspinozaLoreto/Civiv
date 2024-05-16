@@ -1,5 +1,6 @@
 package com.example.civiv;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
@@ -19,12 +20,12 @@ import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 
-public class ReconocidosAdapter extends RecyclerView.Adapter<ReconocidosAdapter.MyViewHolder> {
+public class DetectedProductsAdapter extends RecyclerView.Adapter<DetectedProductsAdapter.MyViewHolder> {
 
     Context context;
     ArrayList<Productoss> list;
 
-    public ReconocidosAdapter(Context context, ArrayList<Productoss> list) {
+    public DetectedProductsAdapter(Context context, ArrayList<Productoss> list) {
         this.context = context;
         this.list = list;
     }
@@ -32,13 +33,16 @@ public class ReconocidosAdapter extends RecyclerView.Adapter<ReconocidosAdapter.
     @Override
     public void onViewRecycled(@NonNull MyViewHolder holder) {
         super.onViewRecycled(holder);
-        Glide.with(context).clear(holder.imagen);
+        if (!((Activity) context).isDestroyed()) {
+            Glide.with(context).clear(holder.imagen);
+        }
     }
+
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(context).inflate(R.layout.productentry, parent, false);
+        View v = LayoutInflater.from(context).inflate(R.layout.productentry_detected, parent, false);
         return new MyViewHolder(v);
     }
 
@@ -66,7 +70,7 @@ public class ReconocidosAdapter extends RecyclerView.Adapter<ReconocidosAdapter.
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
-        TextView product, cantidad, id;
+        TextView product, cantidad;
         ImageView imagen; // Agregar ImageView
 
         public MyViewHolder(@NonNull View itemView) {

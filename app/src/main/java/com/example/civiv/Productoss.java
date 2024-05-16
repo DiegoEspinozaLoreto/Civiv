@@ -11,7 +11,7 @@ public class Productoss implements Parcelable {
     private String nombreProducto;
     private String cantidad;
     private List<String> imageUrls;
-    private String userId; // Asegúrate de tener este campo
+    private String userId;
 
     public Productoss() {
         // Constructor vacío requerido para Firebase

@@ -70,8 +70,10 @@
             android:exported="true"
             android:screenOrientation="portrait"/>
 
-        <activity android:name=".ReconocidosActivity"
-            android:exported="true"/>
+        <activity android:name=".DetectedProductsActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"/>
+
 
 
     </application>
