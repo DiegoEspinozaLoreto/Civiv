@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,14 +55,19 @@ public class DetectedProductsAdapter extends RecyclerView.Adapter<DetectedProduc
 
         // Cargar la primera imagen disponible para el producto, si existe
         if (productoss.getImageUrls() != null && !productoss.getImageUrls().isEmpty()) {
+            String imageUrl = productoss.getImageUrls().get(0); // Asumimos que al menos una imagen está disponible
+            Log.d("Adapter", "Cargando imagen: " + imageUrl); // Log de depuración
             Glide.with(context)
-                    .load(productoss.getImageUrls().get(0)) // Asumimos que al menos una imagen está disponible
+                    .load(imageUrl)
                     .apply(new RequestOptions().override(100, 100)) // Ajusta el tamaño según tus necesidades
                     .into(holder.imagen);
         } else {
             // Opcionalmente puedes poner una imagen predeterminada si no hay imágenes
             holder.imagen.setImageResource(R.drawable.civiv2); // Coloca aquí tu imagen predeterminada
         }
+
+        // Log de depuración
+        Log.d("Adapter", "Producto: " + productoss.getNombreProducto() + ", Cantidad: " + productoss.getCantidad());
     }
 
     @Override

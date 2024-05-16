@@ -17,6 +17,11 @@ public class Productoss implements Parcelable {
         // Constructor vacío requerido para Firebase
     }
 
+    public void incrementarCantidad(int cantidad) {
+        int currentCantidad = Integer.parseInt(this.cantidad);
+        this.cantidad = String.valueOf(currentCantidad + cantidad);
+    }
+
     public Productoss(String id, String nombreProducto, String cantidad, List<String> imageUrls, String userId) {
         this.id = id;
         this.nombreProducto = nombreProducto;

@@ -3,6 +3,7 @@ package com.example.civiv;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -29,6 +30,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Capturar extends AppCompatActivity {
     Bitmap bitmap;
@@ -90,18 +92,26 @@ public class Capturar extends AppCompatActivity {
                     Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas = new Canvas(mutableBitmap);
 
-                    // Crear lista de productos detectados
-                    ArrayList<Productoss> detectedProducts = new ArrayList<>();
+                    // Crear mapa de productos detectados para agrupar por nombre
+                    HashMap<String, Productoss> detectedProductsMap = new HashMap<>();
                     for (Recognition recognition : recognitions) {
                         if (recognition.getConfidence() > 0.1) {
                             RectF location = recognition.getLocation();
                             canvas.drawRect(location, boxPaint);
                             canvas.drawText(recognition.getLabelName() + ":" + recognition.getConfidence(), location.left, location.top, textPaint);
 
-                            // Crear un objeto Productoss con el nombre del producto detectado
-                            detectedProducts.add(new Productoss("", recognition.getLabelName(), "1", null, ""));
+                            // Agregar o actualizar el producto en el mapa
+                            String nombreProducto = recognition.getLabelName();
+                            if (detectedProductsMap.containsKey(nombreProducto)) {
+                                detectedProductsMap.get(nombreProducto).incrementarCantidad(1);
+                            } else {
+                                detectedProductsMap.put(nombreProducto, new Productoss("", nombreProducto, "1", null, ""));
+                            }
                         }
                     }
+
+                    // Convertir el mapa a una lista
+                    ArrayList<Productoss> detectedProducts = new ArrayList<>(detectedProductsMap.values());
 
                     // Iniciar DetectedProductsActivity con la lista de productos detectados
                     Intent intent = new Intent(Capturar.this, DetectedProductsActivity.class);
@@ -114,6 +124,7 @@ public class Capturar extends AppCompatActivity {
                 }
             }
         });
+
 
         toolbar = findViewById(R.id.toolbar2);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -128,6 +139,13 @@ public class Capturar extends AppCompatActivity {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back_white);
         }
+
+        byte[] byteArray = getIntent().getByteArrayExtra("bitmap");
+        if (byteArray != null) {
+            bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+            Imagen.setImageBitmap(bitmap);
+        }
+
     }
 
     private void showPopup(View v) {
