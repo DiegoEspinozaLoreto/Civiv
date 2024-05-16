@@ -15,11 +15,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -31,7 +33,18 @@ public class DetectedProductsActivity extends AppCompatActivity {
     ArrayList<Productoss> list;
     DetectedProductsAdapter adapter;
     Button btnUpdate, btnCancel;
-    Bitmap bitmap;
+
+    DatabaseReference databaseProductos;
+
+    StorageReference storageReference;
+
+    FirebaseAuth firebaseAuth;
+
+    FirebaseUser user;
+
+    String userId;
+    
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +61,6 @@ public class DetectedProductsActivity extends AppCompatActivity {
             list = new ArrayList<>();
         }
 
-        // Obtener el bitmap del intent
-        byte[] byteArray = getIntent().getByteArrayExtra("bitmap");
-        if (byteArray != null) {
-            bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-        }
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new DetectedProductsAdapter(this, list);
         recyclerView.setAdapter(adapter);
@@ -62,21 +69,50 @@ public class DetectedProductsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 updateDatabase();
+                finish();
             }
+
         });
 
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(DetectedProductsActivity.this, "Operación cancelada", Toast.LENGTH_SHORT).show();
-                byte[] byteArray = convertBitmapToByteArray(bitmap);
-                Intent intent = new Intent(DetectedProductsActivity.this, Capturar.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("bitmap", byteArray);
-                startActivity(intent);
+                finish();
             }
         });
     }
+
+    private void findProductIdAndImageByName(String productName, String quantity, int[] updatesRemaining, Productoss product) {
+        databaseProductos.child(userId).orderByChild("nombreProducto").equalTo(productName)
+                .addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull com.google.firebase.database.DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (com.google.firebase.database.DataSnapshot productSnapshot : dataSnapshot.getChildren()) {
+                                String productId = productSnapshot.getKey();
+                                ArrayList<String> imageUrls = new ArrayList<>();
+                                if (productSnapshot.child("imageUrls").exists()) {
+                                    for (DataSnapshot imageUrlSnapshot : productSnapshot.child("imageUrls").getChildren()) {
+                                        imageUrls.add(imageUrlSnapshot.getValue(String.class));
+                                    }
+                                }
+                                product.setId(productId);
+                                product.setImageUrls(imageUrls);
+                                updateProductQuantity(productId, quantity, updatesRemaining);
+                            }
+                        } else {
+                            Toast.makeText(DetectedProductsActivity.this, "Producto no encontrado: " + productName, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull com.google.firebase.database.DatabaseError databaseError) {
+                        Toast.makeText(DetectedProductsActivity.this, "Error al buscar producto: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
 
     private void updateDatabase() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -112,12 +148,7 @@ public class DetectedProductsActivity extends AppCompatActivity {
                     if (remainingUpdates[0] == 0) {
                         Toast.makeText(DetectedProductsActivity.this, "Base de datos actualizada.", Toast.LENGTH_SHORT).show();
 
-                        // Volver a Capturar activity y pasar el bitmap
-                        byte[] byteArray = convertBitmapToByteArray(bitmap);
-                        Intent intent = new Intent(DetectedProductsActivity.this, Capturar.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        intent.putExtra("bitmap", byteArray);
-                        startActivity(intent);
+                        finish();
                     }
                 }
 
@@ -129,25 +160,12 @@ public class DetectedProductsActivity extends AppCompatActivity {
                     if (remainingUpdates[0] == 0) {
                         Toast.makeText(DetectedProductsActivity.this, "Base de datos actualizada.", Toast.LENGTH_SHORT).show();
 
-                        // Volver a Capturar activity y pasar el bitmap
-                        byte[] byteArray = convertBitmapToByteArray(bitmap);
-                        Intent intent = new Intent(DetectedProductsActivity.this, Capturar.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        intent.putExtra("bitmap", byteArray);
-                        startActivity(intent);
+                        finish();
                     }
                 }
             });
         }
     }
 
-    // Método para convertir bitmap a byte array
-    private byte[] convertBitmapToByteArray(Bitmap bitmap) {
-        if (bitmap == null) {
-            return null;
-        }
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        return stream.toByteArray();
-    }
+
 }
