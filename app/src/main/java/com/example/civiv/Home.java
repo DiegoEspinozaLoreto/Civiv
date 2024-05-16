@@ -13,6 +13,7 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.example.civiv.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,21 +21,18 @@ import com.google.firebase.auth.FirebaseAuth;
 public class Home extends AppCompatActivity implements View.OnClickListener {
 
     private FirebaseAuth mAuth;
-    private ImageButton back;
     private Button train;
     private Button capturar;
     private ImageButton b;
     private ImageButton calc;
     private Button btnProducto;
 
+    Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
 
-        // Configuración del botón de regreso
-        back = findViewById(R.id.regresarMenuButton);
-        back.setOnClickListener(this);
 
         // Configuración de los botones de entrenar y capturar
         train = findViewById(R.id.trainingButton);
@@ -56,20 +54,25 @@ public class Home extends AppCompatActivity implements View.OnClickListener {
             }
         });
 
+        toolbar = findViewById(R.id.toolbar2);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            ((Window) window).addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(getResources().getColor(R.color.dots_background));
+        }
+
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back_white);
         }
     }
 
     @Override
     public void onClick(View v) {
         Intent transicion;
-        if (v.getId() == R.id.regresarMenuButton) {
-            transicion = new Intent(Home.this, Login.class);
-            startActivity(transicion);
-        } else if (v.getId() == R.id.trainingButton) {
+        if (v.getId() == R.id.trainingButton) {
             transicion = new Intent(Home.this, Training.class);
             startActivity(transicion);
         } else if (v.getId() == R.id.capturarButton) {
@@ -103,5 +106,13 @@ public class Home extends AppCompatActivity implements View.OnClickListener {
 
         });
         popup.show();
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();  // Finaliza la actividad y regresa
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
