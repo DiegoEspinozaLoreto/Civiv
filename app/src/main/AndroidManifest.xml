@@ -23,16 +23,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
-
-        </activity>
-
-        <activity
-            android:name=".Login"
-            android:exported="true"/>
-
-        <activity
-            android:name=".Home"
-            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -40,32 +30,56 @@
 
         </activity>
 
+        <activity
+            android:name=".Login"
+            android:exported="true"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name=".Home"
+            android:exported="true"
+            android:screenOrientation="portrait">
+
+        </activity>
+
 
         <activity
             android:name=".Registro"
-            android:exported="true"/>
+            android:exported="true"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".calculadora"
-            android:exported="true"/>
+            android:exported="true"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".Training"
-            android:exported="true"/>
+            android:exported="true"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".Capturar"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
         </activity>
 
         <activity
             android:name=".InsertarProductos"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
 
         </activity>
 
         <activity android:name=".ProductoList"
-            android:exported="true"/>
+            android:exported="true"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".DetectedProductsActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"/>
+
+
 
     </application>
 

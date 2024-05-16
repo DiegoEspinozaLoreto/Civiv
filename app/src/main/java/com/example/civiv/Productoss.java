@@ -1,9 +1,11 @@
 package com.example.civiv;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.List;
 
-public class Productoss {
-
+public class Productoss implements Parcelable {
 
     private String id;
     private String nombreProducto;
@@ -11,17 +13,13 @@ public class Productoss {
     private List<String> imageUrls;
     private String userId;
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-
     public Productoss() {
         // Constructor vacío requerido para Firebase
+    }
+
+    public void incrementarCantidad(int cantidad) {
+        int currentCantidad = Integer.parseInt(this.cantidad);
+        this.cantidad = String.valueOf(currentCantidad + cantidad);
     }
 
     public Productoss(String id, String nombreProducto, String cantidad, List<String> imageUrls, String userId) {
@@ -31,6 +29,26 @@ public class Productoss {
         this.imageUrls = imageUrls;
         this.userId = userId;
     }
+
+    protected Productoss(Parcel in) {
+        id = in.readString();
+        nombreProducto = in.readString();
+        cantidad = in.readString();
+        imageUrls = in.createStringArrayList();
+        userId = in.readString();
+    }
+
+    public static final Creator<Productoss> CREATOR = new Creator<Productoss>() {
+        @Override
+        public Productoss createFromParcel(Parcel in) {
+            return new Productoss(in);
+        }
+
+        @Override
+        public Productoss[] newArray(int size) {
+            return new Productoss[size];
+        }
+    };
 
     public String getId() {
         return id;
@@ -62,5 +80,27 @@ public class Productoss {
 
     public void setImageUrls(List<String> imageUrls) {
         this.imageUrls = imageUrls;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(nombreProducto);
+        dest.writeString(cantidad);
+        dest.writeStringList(imageUrls);
+        dest.writeString(userId);
     }
 }

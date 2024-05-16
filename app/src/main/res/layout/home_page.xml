@@ -17,42 +17,55 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar2"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#0300A3"
             android:minHeight="?attr/actionBarSize"
             android:theme="?attr/actionBarTheme"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:title="CIVIV"
+            app:titleTextColor="@android:color/white"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="68dp"
-            android:layout_height="39dp"
-            android:text="CIVIV"
-            android:contentDescription="Titulo de aplicacion"
-            android:textColor="#F4F4F4"
-            android:textSize="24sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.157"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.02" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Agrega la imagen -->
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/civiv2"
+                    android:layout_gravity="center_vertical"/>
+
+                <!-- Título de la Toolbar -->
+                <TextView
+                    android:layout_marginLeft="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CIVIV"
+                    android:textColor="@android:color/white"
+                    android:textSize="30sp"
+                    android:layout_gravity="center_vertical"/>
+
+            </LinearLayout>
+
+        </androidx.appcompat.widget.Toolbar>
 
         <ImageButton
             android:id="@+id/popUpButton"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="50dp"
+            android:layout_height="42dp"
+            android:background="#00FFFFFF"
+            android:contentDescription="Botón de puntos"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.950"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.014"
-            app:srcCompat="@mipmap/dots"
-            android:contentDescription="Botón de puntos" />
+            app:layout_constraintVertical_bias="0.017"
+            app:srcCompat="@drawable/user" />
+
 
 
         <ImageView
@@ -67,33 +80,34 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar2"
             app:layout_constraintVertical_bias="0.05"
-            app:srcCompat="@android:drawable/ic_menu_camera"
+            app:srcCompat="@drawable/capturar"
             android:contentDescription="Imagen de camara"/>
 
         <ImageView
             android:id="@+id/imageView3"
             android:layout_width="130dp"
             android:layout_height="130dp"
+            android:rotation="90"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.501"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar2"
             app:layout_constraintVertical_bias="0.439"
-            app:srcCompat="@android:drawable/ic_menu_manage" />
+            app:srcCompat="@drawable/entrenamiento" />
 
         <ImageView
             android:id="@+id/imageView4"
             android:layout_width="130dp"
             android:layout_height="130dp"
-            android:backgroundTint="#FFFFFF"
+            android:backgroundTint="#00FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.501"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar2"
             app:layout_constraintVertical_bias="0.851"
-            app:srcCompat="@android:drawable/ic_menu_search" />
+            app:srcCompat="@drawable/products" />
 
         <Button
             android:id="@+id/capturarButton"
@@ -103,7 +117,8 @@
             android:backgroundTint="#E04B00"
             android:text="Capturar"
             android:textAlignment="center"
-            app:layout_constraintBottom_toBottomOf="@+id/button4"
+            android:textColor="#FFFFFF"
+            app:layout_constraintBottom_toTopOf="@+id/imageView3"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
@@ -116,6 +131,7 @@
             android:layout_height="50dp"
             android:backgroundTint="#E04B00"
             android:text="Entrenar"
+            android:textColor="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.501"
@@ -129,6 +145,7 @@
             android:layout_height="50dp"
             android:backgroundTint="#E04B00"
             android:text="Productos"
+            android:textColor="#FFFFFF"
             app:iconTint="#0E04B0"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -136,32 +153,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar2"
             app:layout_constraintVertical_bias="0.974" />
-
-        <ImageView
-            android:id="@+id/imageView5"
-            android:layout_width="31dp"
-            android:layout_height="32dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.028"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.024"
-            app:srcCompat="@drawable/civiv2" />
-
-        <ImageButton
-            android:id="@+id/regresarMenuButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:rotation="90"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.045"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-            app:layout_constraintVertical_bias="0.016"
-            app:srcCompat="@android:drawable/arrow_down_float"
-            android:contentDescription="Botón de regreso a inicio"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

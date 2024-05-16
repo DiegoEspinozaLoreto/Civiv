@@ -35,6 +35,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         this.list = list;
     }
 
+    @Override
+    public void onViewRecycled(@NonNull MyViewHolder holder) {
+        super.onViewRecycled(holder);
+        Glide.with(context).clear(holder.imagen);
+    }
+
+
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -47,19 +54,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         Productoss productoss = list.get(position);
         setBoldText(holder.product, "Producto:", productoss.getNombreProducto());
         setBoldText(holder.cantidad, "Cantidad:", productoss.getCantidad());
-        setBoldText(holder.id, "ID:", productoss.getId());
+
 
         // Cargar la primera imagen disponible para el producto, si existe
         if (productoss.getImageUrls() != null && !productoss.getImageUrls().isEmpty()) {
             Glide.with(context)
                     .load(productoss.getImageUrls().get(0)) // Asumimos que al menos una imagen está disponible
-                    .fitCenter()
+                    .apply(new RequestOptions().override(100, 100)) // Ajusta el tamaño según tus necesidades
                     .into(holder.imagen);
         } else {
             // Opcionalmente puedes poner una imagen predeterminada si no hay imágenes
             holder.imagen.setImageResource(R.drawable.civiv2); // Coloca aquí tu imagen predeterminada
         }
     }
+
 
 
     @Override
@@ -75,7 +83,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             super(itemView);
             product = itemView.findViewById(R.id.textProduct);
             cantidad = itemView.findViewById(R.id.textCantidad);
-            id = itemView.findViewById(R.id.textID);
             imagen = itemView.findViewById(R.id.imagenProducto); // Asegúrate de que este ID corresponde al ImageView en tu layout XML
         }
     }
@@ -87,3 +94,4 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         textView.setText(spannable);
     }
 }
+

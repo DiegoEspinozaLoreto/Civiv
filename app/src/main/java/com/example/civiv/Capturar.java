@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -16,16 +17,21 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.hardware.camera2.CameraManager;
@@ -39,6 +45,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import androidx.appcompat.widget.Toolbar;
+import com.google.firebase.auth.FirebaseAuth;
+import java.util.HashMap;
 
 public class Capturar extends AppCompatActivity {
     Bitmap bitmap;
@@ -49,13 +58,19 @@ public class Capturar extends AppCompatActivity {
     CameraManager cameraManager;
     Handler handler;
     CameraDevice cameraDevce;
+    ArrayList<Recognition> recognitions;
 
     public Button capturarBtn;
     public Button cargarBtn;
     public Button camaraBtn;
     public ImageView Imagen;
-    public ImageButton back;
     Surface surface;
+
+
+
+    public ImageButton popUp;
+    Toolbar toolbar;
+
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -66,7 +81,6 @@ public class Capturar extends AppCompatActivity {
         capturarBtn = (Button) findViewById(R.id.capturarButton);
         cargarBtn = (Button) findViewById(R.id.cargarButton);
         camaraBtn = (Button) findViewById(R.id.camaraBtn);
-        back = (ImageButton) findViewById(R.id.regresarMenuButton);
         Imagen = (ImageView) findViewById(R.id.imageView);
 
         get_permission();
@@ -118,6 +132,13 @@ public class Capturar extends AppCompatActivity {
         textPaint.setColor(Color.GREEN);
         textPaint.setStyle(Paint.Style.FILL);
 
+        popUp = findViewById(R.id.popUpButton);
+        popUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopup(v);
+            }
+        });
 
 
         camaraBtn.setOnClickListener(new View.OnClickListener() {
@@ -148,16 +169,7 @@ public class Capturar extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_PICK);
                 intent.setType("image/*");
-                startActivityForResult(intent,10);
-            }
-        });
-
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent transicion = new Intent(Capturar.this, Home.class);
-                startActivity(transicion);
-                finish();
+                startActivityForResult(intent, 10);
             }
         });
 
@@ -165,9 +177,71 @@ public class Capturar extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 predecir();
-            }
+                HashMap<String,Productoss> detectedProductsMap = new HashMap<>();
+                for (Recognition recognition : recognitions) {
+                    if (recognition.getConfidence() > 0.1) {
+                        String nombreProducto = recognition.getLabelName();
+                        if (detectedProductsMap.containsKey(nombreProducto)) {
+                            detectedProductsMap.get(nombreProducto).incrementarCantidad(1);
+                        } else {
+                            detectedProductsMap.put(nombreProducto, new Productoss("", nombreProducto, "1", null, ""));
+                        }
+                    }
+                }
+                // Agregar o actualizar el producto en el mapa
+                // Convertir el mapa a una lista
+                ArrayList<Productoss> detectedProducts = new ArrayList<>(detectedProductsMap.values());
 
+                // Iniciar DetectedProductsActivity con la lista de productos detectados
+                Intent intent = new Intent(Capturar.this, DetectedProductsActivity.class);
+                intent.putParcelableArrayListExtra("detectedProducts", detectedProducts);
+                startActivity(intent);
+
+
+                if (bitmap != null) {
+                    recognitions = yolo8TFLiteDetector.detect(bitmap);
+                    Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                    Canvas canvas = new Canvas(mutableBitmap);
+
+                    // Crear mapa de productos detectados para agrupar por nombre
+                    for (Recognition recognition : recognitions) {
+                        if (recognition.getConfidence() > 0.1) {
+                            RectF location = recognition.getLocation();
+                            canvas.drawRect(location, boxPaint);
+                            canvas.drawText(recognition.getLabelName() + ":" + recognition.getConfidence(), location.left, location.top, textPaint);
+
+                        }
+                    }
+
+                    Imagen.setImageBitmap(mutableBitmap);
+                } else {
+                    Toast.makeText(Capturar.this, "Carga una imagen primero", Toast.LENGTH_SHORT).show();
+                }
+
+            }
         });
+
+
+        toolbar = findViewById(R.id.toolbar2);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            ((Window) window).addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(R.color.dots_background));
+        }
+
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back_white);
+        }
+
+        byte[] byteArray = getIntent().getByteArrayExtra("bitmap");
+        if (byteArray != null) {
+            bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+            Imagen.setImageBitmap(bitmap);
+        }
+
     }
 
     private void predecir() {
@@ -251,7 +325,7 @@ public class Capturar extends AppCompatActivity {
 
     private void get_permission() {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)!=PackageManager.PERMISSION_GRANTED){
-           requestPermissions(new String[]{Manifest.permission.CAMERA},101);
+            requestPermissions(new String[]{Manifest.permission.CAMERA},101);
 
         }
     }
@@ -259,24 +333,55 @@ public class Capturar extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults[0]!=PackageManager.PERMISSION_GRANTED){
+        if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
             get_permission();
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(requestCode == 10){
-            if(data!=null){
-                Uri uri = data.getData();
-                try {
-                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),uri);
-                    Imagen.setImageBitmap(bitmap);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+    private void showPopup(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.getMenuInflater().inflate(R.menu.menu_popup, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.menu_logout) {
+                    FirebaseAuth.getInstance().signOut();
+                    Toast.makeText(Capturar.this, "Sesión cerrada exitosamente", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(Capturar.this, Login.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                    return true;
+                } else {
+                    return false;
                 }
             }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
+        });
+        popup.show();
     }
-}
+
+        @Override
+        protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+            if (requestCode == 10) {
+                if (data != null) {
+                    Uri uri = data.getData();
+                    try {
+                        bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+                        Imagen.setImageBitmap(bitmap);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            if (item.getItemId() == android.R.id.home) {
+                finish();  // Finaliza la actividad y regresa
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+    };

@@ -1,6 +1,5 @@
 package com.example.civiv;
 
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -19,8 +18,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
-
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -29,7 +28,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -48,13 +46,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-
 public class InsertarProductos extends AppCompatActivity {
     Button btnInsert, btnView, btnSeleccionarImagen;
     EditText nombreProducto, Cantidad;
     LinearLayout ImagenPreview;
     DatabaseReference databaseProductos;
     StorageReference storageReference;
+    TextView aviso;
 
     FirebaseAuth firebaseAuth;
 
@@ -62,13 +60,11 @@ public class InsertarProductos extends AppCompatActivity {
 
     String userId;
 
-
     Uri image;
     List<Uri> productImages = new ArrayList<>();
     int imageCounter = 1;
 
     Toolbar toolbar;
-
 
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
@@ -94,7 +90,6 @@ public class InsertarProductos extends AppCompatActivity {
                     }
 
                     // Actualizar la vista previa de la imagen y verificar los campos vacíos
-
                     updateImagePreview();
                     checkFieldsForEmptyValues();
                 } else {
@@ -116,22 +111,21 @@ public class InsertarProductos extends AppCompatActivity {
         Cantidad = findViewById(R.id.editCantidad);
         databaseProductos = FirebaseDatabase.getInstance().getReference();
         storageReference = FirebaseStorage.getInstance().getReference();
-        toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar2);
+        aviso = findViewById(R.id.avisoCampoVacio);
+        aviso.setVisibility(View.INVISIBLE);
 
         firebaseAuth = FirebaseAuth.getInstance();
         user = firebaseAuth.getCurrentUser();
 
         if (user != null) {
-             userId = user.getUid(); // Este es el ID único del usuario autenticado
+            userId = user.getUid(); // Este es el ID único del usuario autenticado
         }
-
 
         btnInsert.setEnabled(false);
         addNumberInputFilter(Cantidad);
         Cantidad.setInputType(InputType.TYPE_CLASS_NUMBER);
         btnSeleccionarImagen.setEnabled(false);
-
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
@@ -156,7 +150,7 @@ public class InsertarProductos extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ImagenPreview.removeAllViews();
-                Intent intent = new Intent(Intent.ACTION_PICK);
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 activityResultLauncher.launch(Intent.createChooser(intent, "Selecciona las imagenes"));
@@ -167,7 +161,6 @@ public class InsertarProductos extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(InsertarProductos.this, ProductoList.class));
-
             }
         });
 
@@ -193,7 +186,6 @@ public class InsertarProductos extends AppCompatActivity {
             }
         });
 
-
         Cantidad.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -210,8 +202,6 @@ public class InsertarProductos extends AppCompatActivity {
         });
     }
 
-
-
     private void checkFieldsForEmptyValues() {
         String producto = nombreProducto.getText().toString().trim();
         String cantidad = Cantidad.getText().toString().trim();
@@ -219,11 +209,14 @@ public class InsertarProductos extends AppCompatActivity {
         if (producto != null && cantidad != null) {
             if (!TextUtils.isEmpty(producto) && !TextUtils.isEmpty(cantidad) && !productImages.isEmpty()) {
                 btnInsert.setEnabled(true);
+                aviso.setVisibility(View.INVISIBLE);
             } else {
                 btnInsert.setEnabled(false);
+                aviso.setVisibility(View.VISIBLE);
             }
         } else {
             btnInsert.setEnabled(false);
+            aviso.setVisibility(View.VISIBLE);
         }
     }
 
@@ -234,14 +227,12 @@ public class InsertarProductos extends AppCompatActivity {
         productImages.clear();
     }
 
-
-
     private void uploadMultipleImages(List<Uri> images, final String producto) {
         final List<String> imageUrls = new ArrayList<>(Collections.nCopies(images.size(), null));  // Inicializa con nulls
         for (int i = 0; i < images.size(); i++) {
             final int index = i;  // Guarda el índice actual
             final Uri imageUri = images.get(i);
-            final StorageReference reference = storageReference.child(userId+"images/" + producto + "_imagen" + UUID.randomUUID().toString());
+            final StorageReference reference = storageReference.child(userId + "images/" + producto + "_imagen" + UUID.randomUUID().toString());
 
             reference.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -253,7 +244,6 @@ public class InsertarProductos extends AppCompatActivity {
                             // Verifica si todas las posiciones están llenas (no null)
                             if (!imageUrls.contains(null)) {
                                 InsertData(producto, Cantidad.getText().toString(), imageUrls, userId);
-                                clearFields();
                             }
                         }
                     });
@@ -261,12 +251,6 @@ public class InsertarProductos extends AppCompatActivity {
             });
         }
     }
-
-
-
-
-
-
 
     private void InsertData(String nombreProducto, String cantidadProducto, List<String> imageUrls, String userId) {
         String id = databaseProductos.push().getKey();
@@ -286,37 +270,24 @@ public class InsertarProductos extends AppCompatActivity {
     }
 
 
-
-    private List<String> obtenerNombreDeImagenes() {
-        List<String> nombresImagenes = new ArrayList<>();
-        for (int i = 1; i <= productImages.size(); i++) {
-            nombresImagenes.add(nombreProducto.getText().toString() + "imagen" + i);
-        }
-        return nombresImagenes;
-    }
-
-
-
-
     private void addNumberInputFilter(EditText editText) {
         editText.setFilters(new InputFilter[]{new InputFilter() {
             @Override
             public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
                 for (int i = start; i < end; i++) {
                     if (!Character.isDigit(source.charAt(i))) {
-                        return ""; // Reject the character if it's not a digit
+                        return "";
                     }
                 }
-                return null; // Accept characters only if they are digits
+                return null;
             }
         }});
     }
 
     private void updateImagePreview() {
-        // Clear previous images
+
         ImagenPreview.removeAllViews();
 
-        // Load each selected image into ImageView
         for (Uri imageUri : productImages) {
             ImageView imageView = new ImageView(this);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -327,7 +298,6 @@ public class InsertarProductos extends AppCompatActivity {
         }
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -336,6 +306,4 @@ public class InsertarProductos extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
 }
-
