@@ -5,13 +5,56 @@
     android:layout_height="match_parent"
     tools:context=".DetectedProductsActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#0300A3"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:title="CIVIV"
+        app:titleTextColor="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!-- Agrega la imagen -->
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/civiv2"
+                android:layout_gravity="center_vertical"/>
+
+            <!-- Título de la Toolbar -->
+            <TextView
+                android:layout_marginLeft="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CIVIV"
+                android:textColor="@android:color/white"
+                android:textSize="30sp"
+                android:layout_gravity="center_vertical"/>
+
+        </LinearLayout>
+
+    </androidx.appcompat.widget.Toolbar>
+
+
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewDetectedProducts"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="379dp"
+        android:layout_height="587dp"
+        android:layout_below="@id/toolbar2"
         android:layout_above="@+id/buttonUpdate"
-         android:layout_margin="16dp" />
-
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="-5dp" />
 
     <Button
         android:id="@+id/buttonUpdate"

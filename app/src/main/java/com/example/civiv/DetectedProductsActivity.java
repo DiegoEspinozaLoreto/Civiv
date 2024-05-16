@@ -3,14 +3,22 @@ package com.example.civiv;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
+
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,17 +41,14 @@ public class DetectedProductsActivity extends AppCompatActivity {
     ArrayList<Productoss> list;
     DetectedProductsAdapter adapter;
     Button btnUpdate, btnCancel;
-
     DatabaseReference databaseProductos;
-
-    StorageReference storageReference;
-
     FirebaseAuth firebaseAuth;
-
     FirebaseUser user;
-
     String userId;
-    
+
+
+    Toolbar toolbar;
+
 
 
     @Override
@@ -61,9 +66,26 @@ public class DetectedProductsActivity extends AppCompatActivity {
             list = new ArrayList<>();
         }
 
+
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new DetectedProductsAdapter(this, list);
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        adapter = new DetectedProductsAdapter(this, list, userId);
         recyclerView.setAdapter(adapter);
+
+        toolbar = findViewById(R.id.toolbar2);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            ((Window) window).addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(R.color.dots_background));
+        }
+
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back_white);
+        }
 
         btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,7 +93,6 @@ public class DetectedProductsActivity extends AppCompatActivity {
                 updateDatabase();
                 finish();
             }
-
         });
 
         btnCancel.setOnClickListener(new View.OnClickListener() {
@@ -83,26 +104,49 @@ public class DetectedProductsActivity extends AppCompatActivity {
         });
     }
 
-    private void findProductIdAndImageByName(String productName, String quantity, int[] updatesRemaining, Productoss product) {
-        databaseProductos.child(userId).orderByChild("nombreProducto").equalTo(productName)
+    private void updateDatabase() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("productos").child(userId);
+
+        // Mantener un contador de actualizaciones pendientes
+        final int[] updatesRemaining = {list.size()};
+
+        for (Productoss producto : list) {
+            findProductIdByNameAndUpdate(producto.getNombreProducto(), producto.getCantidad(), updatesRemaining);
+        }
+    }
+
+    private void findProductIdByNameAndUpdate(String productName, String cantidad, int[] updatesRemaining) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference databaseProductos = FirebaseDatabase.getInstance().getReference("productos").child(userId);
+
+        databaseProductos.orderByChild("nombreProducto").equalTo(productName)
                 .addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull com.google.firebase.database.DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             for (com.google.firebase.database.DataSnapshot productSnapshot : dataSnapshot.getChildren()) {
                                 String productId = productSnapshot.getKey();
-                                ArrayList<String> imageUrls = new ArrayList<>();
-                                if (productSnapshot.child("imageUrls").exists()) {
-                                    for (DataSnapshot imageUrlSnapshot : productSnapshot.child("imageUrls").getChildren()) {
-                                        imageUrls.add(imageUrlSnapshot.getValue(String.class));
-                                    }
-                                }
-                                product.setId(productId);
-                                product.setImageUrls(imageUrls);
-                                updateProductQuantity(productId, quantity, updatesRemaining);
+                                databaseProductos.child(productId).child("cantidad").setValue(cantidad)
+                                        .addOnCompleteListener(task -> {
+                                            if (task.isSuccessful()) {
+                                                // Decrementar el contador de actualizaciones pendientes
+                                                updatesRemaining[0]--;
+                                                if (updatesRemaining[0] == 0) {
+                                                    Toast.makeText(DetectedProductsActivity.this, "Base de datos actualizada.", Toast.LENGTH_SHORT).show();
+                                                    finish();
+                                                }
+                                            } else {
+                                                Toast.makeText(DetectedProductsActivity.this, "Error al actualizar producto: " + productName, Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
                             }
                         } else {
-                            Toast.makeText(DetectedProductsActivity.this, "Producto no encontrado: " + productName, Toast.LENGTH_SHORT).show();
+                            updatesRemaining[0]--;
+                            if (updatesRemaining[0] == 0) {
+                                Toast.makeText(DetectedProductsActivity.this, "Base de datos actualizada.", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
                         }
                     }
 
@@ -114,58 +158,15 @@ public class DetectedProductsActivity extends AppCompatActivity {
     }
 
 
-    private void updateDatabase() {
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("productos").child(userId);
 
-        int[] remainingUpdates = {list.size()};
-        ArrayList<Productoss> updatedProducts = new ArrayList<>();
-
-        for (Productoss producto : list) {
-            databaseReference.orderByChild("nombreProducto").equalTo(producto.getNombreProducto()).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                            String productId = dataSnapshot.getKey();
-                            Log.d("updateDatabase", "Producto encontrado: " + producto.getNombreProducto() + ", ID: " + productId);
-                            databaseReference.child(productId).child("cantidad").setValue(producto.getCantidad());
-
-                            // Obtener y establecer la URL de la imagen
-                            ArrayList<String> imageUrls = new ArrayList<>();
-                            for (DataSnapshot imageSnapshot : dataSnapshot.child("imageUrls").getChildren()) {
-                                String imageUrl = imageSnapshot.getValue(String.class);
-                                imageUrls.add(imageUrl);
-                            }
-                            producto.setImageUrls(imageUrls);
-                            updatedProducts.add(producto);
-                            Log.d("updateDatabase", "URL de la imagen: " + imageUrls.toString());
-                        }
-                    } else {
-                        Log.d("updateDatabase", "Producto no encontrado: " + producto.getNombreProducto());
-                    }
-                    remainingUpdates[0]--;
-                    if (remainingUpdates[0] == 0) {
-                        Toast.makeText(DetectedProductsActivity.this, "Base de datos actualizada.", Toast.LENGTH_SHORT).show();
-
-                        finish();
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    // Manejar el error
-                    Log.e("updateDatabase", "Error: " + error.getMessage());
-                    remainingUpdates[0]--;
-                    if (remainingUpdates[0] == 0) {
-                        Toast.makeText(DetectedProductsActivity.this, "Base de datos actualizada.", Toast.LENGTH_SHORT).show();
-
-                        finish();
-                    }
-                }
-            });
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();  // Finaliza la actividad y regresa
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
-
 }
+

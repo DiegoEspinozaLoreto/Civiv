@@ -66,6 +66,7 @@ public class Capturar extends AppCompatActivity {
         textPaint.setTextSize(50);
         textPaint.setColor(Color.GREEN);
         textPaint.setStyle(Paint.Style.FILL);
+
         popUp = findViewById(R.id.popUpButton);
         popUp.setOnClickListener(new View.OnClickListener() {
             @Override

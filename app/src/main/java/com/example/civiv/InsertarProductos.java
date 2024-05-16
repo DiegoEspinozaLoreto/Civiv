@@ -244,7 +244,6 @@ public class InsertarProductos extends AppCompatActivity {
                             // Verifica si todas las posiciones están llenas (no null)
                             if (!imageUrls.contains(null)) {
                                 InsertData(producto, Cantidad.getText().toString(), imageUrls, userId);
-                                clearFields();
                             }
                         }
                     });
@@ -270,13 +269,6 @@ public class InsertarProductos extends AppCompatActivity {
                 });
     }
 
-    private List<String> obtenerNombreDeImagenes() {
-        List<String> nombresImagenes = new ArrayList<>();
-        for (int i = 1; i <= productImages.size(); i++) {
-            nombresImagenes.add(nombreProducto.getText().toString() + "imagen" + i);
-        }
-        return nombresImagenes;
-    }
 
     private void addNumberInputFilter(EditText editText) {
         editText.setFilters(new InputFilter[]{new InputFilter() {

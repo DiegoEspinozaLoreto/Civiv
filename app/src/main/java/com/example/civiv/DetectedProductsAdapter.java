@@ -6,18 +6,21 @@ import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
@@ -25,10 +28,14 @@ public class DetectedProductsAdapter extends RecyclerView.Adapter<DetectedProduc
 
     Context context;
     ArrayList<Productoss> list;
+    DatabaseReference databaseProductos;
+    String userId;
 
-    public DetectedProductsAdapter(Context context, ArrayList<Productoss> list) {
+    public DetectedProductsAdapter(Context context, ArrayList<Productoss> list, String userId) {
         this.context = context;
         this.list = list;
+        this.userId = userId;
+        this.databaseProductos = FirebaseDatabase.getInstance().getReference("productos").child(userId);
     }
 
     @Override
@@ -38,7 +45,6 @@ public class DetectedProductsAdapter extends RecyclerView.Adapter<DetectedProduc
             Glide.with(context).clear(holder.imagen);
         }
     }
-
 
     @NonNull
     @Override
@@ -53,21 +59,8 @@ public class DetectedProductsAdapter extends RecyclerView.Adapter<DetectedProduc
         setBoldText(holder.product, "Producto:", productoss.getNombreProducto());
         setBoldText(holder.cantidad, "Cantidad:", productoss.getCantidad());
 
-        // Cargar la primera imagen disponible para el producto, si existe
-        if (productoss.getImageUrls() != null && !productoss.getImageUrls().isEmpty()) {
-            String imageUrl = productoss.getImageUrls().get(0); // Asumimos que al menos una imagen está disponible
-            Log.d("Adapter", "Cargando imagen: " + imageUrl); // Log de depuración
-            Glide.with(context)
-                    .load(imageUrl)
-                    .apply(new RequestOptions().override(100, 100)) // Ajusta el tamaño según tus necesidades
-                    .into(holder.imagen);
-        } else {
-            // Opcionalmente puedes poner una imagen predeterminada si no hay imágenes
-            holder.imagen.setImageResource(R.drawable.civiv2); // Coloca aquí tu imagen predeterminada
-        }
-
-        // Log de depuración
-        Log.d("Adapter", "Producto: " + productoss.getNombreProducto() + ", Cantidad: " + productoss.getCantidad());
+        // Buscar y cargar la URL de la imagen
+        findImageByName(productoss.getNombreProducto(), holder.imagen);
     }
 
     @Override
@@ -91,5 +84,35 @@ public class DetectedProductsAdapter extends RecyclerView.Adapter<DetectedProduc
         SpannableStringBuilder spannable = new SpannableStringBuilder(label + "\n" + value);
         spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         textView.setText(spannable);
+    }
+
+    private void findImageByName(String productName, ImageView imageView) {
+        databaseProductos.orderByChild("nombreProducto").equalTo(productName)
+                .addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull com.google.firebase.database.DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (com.google.firebase.database.DataSnapshot productSnapshot : dataSnapshot.getChildren()) {
+                                if (productSnapshot.child("imageUrls").exists()) {
+                                    for (DataSnapshot imageUrlSnapshot : productSnapshot.child("imageUrls").getChildren()) {
+                                        String imageUrl = imageUrlSnapshot.getValue(String.class);
+                                        if (imageUrl != null) {
+                                            Glide.with(context)
+                                                    .load(imageUrl)
+                                                    .apply(new RequestOptions().override(100, 100))
+                                                    .into(imageView);
+                                            return; // Cargar la primera imagen encontrada
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull com.google.firebase.database.DatabaseError databaseError) {
+                        Toast.makeText(context, "Error al buscar imagen: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }
