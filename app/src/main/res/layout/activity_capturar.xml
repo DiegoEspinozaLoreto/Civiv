@@ -57,16 +57,16 @@
         app:layout_constraintVertical_bias="0.014"
         app:srcCompat="@drawable/user" />
 
-        <TextureView
-            android:id="@+id/textureView"
-            android:layout_width="388dp"
-            android:layout_height="446dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.478"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/toolbar2"
-            app:layout_constraintVertical_bias="0.435" />
+    <TextureView
+        android:id="@+id/textureView"
+        android:layout_width="388dp"
+        android:layout_height="446dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.478"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/toolbar2"
+        app:layout_constraintVertical_bias="0.368" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -78,7 +78,7 @@
         app:layout_constraintHorizontal_bias="0.478"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-        app:layout_constraintVertical_bias="0.271" />
+        app:layout_constraintVertical_bias="0.213" />
 
     <Button
         android:id="@+id/capturarButton"
@@ -106,16 +106,18 @@
         app:layout_constraintTop_toTopOf="@+id/toolbar2"
         app:layout_constraintVertical_bias="0.834" />
 
-        <Button
-            android:id="@+id/camaraBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Camara"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.9"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.834" />
+    <ImageButton
+        android:id="@+id/camaraBtn"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:backgroundTint="#EAF2EF"
+        android:src="@drawable/camara1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.889"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.834" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
