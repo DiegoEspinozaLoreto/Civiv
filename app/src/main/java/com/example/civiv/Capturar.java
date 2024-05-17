@@ -62,7 +62,7 @@ public class Capturar extends AppCompatActivity {
 
     public Button capturarBtn;
     public Button cargarBtn;
-    public Button camaraBtn;
+    public ImageButton camaraBtn;
     public ImageView Imagen;
     Surface surface;
 
@@ -80,8 +80,9 @@ public class Capturar extends AppCompatActivity {
 
         capturarBtn = (Button) findViewById(R.id.capturarButton);
         cargarBtn = (Button) findViewById(R.id.cargarButton);
-        camaraBtn = (Button) findViewById(R.id.camaraBtn);
+        camaraBtn = (ImageButton)findViewById(R.id.camaraBtn);
         Imagen = (ImageView) findViewById(R.id.imageView);
+        Imagen.setImageResource(R.drawable.frame_camara);
 
         get_permission();
         HandlerThread handlerThread = new HandlerThread("videoThread");
