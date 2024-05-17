@@ -110,10 +110,13 @@ public class Capturar extends AppCompatActivity {
             @Override
             public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
                 // Handle surface texture updated
-                System.out.println("updated");
-                bitmap =textureView.getBitmap();
-                Imagen.setImageBitmap(bitmap);
-                predecir();
+                if (cameraDevce!=null){
+                    System.out.println("updated");
+                    bitmap =textureView.getBitmap();
+                    Imagen.setImageBitmap(bitmap);
+                    predecir();
+                }
+
             }
         });
 
@@ -123,6 +126,7 @@ public class Capturar extends AppCompatActivity {
         yolo8TFLiteDetector = new Yolo8TFLiteDetector();
         yolo8TFLiteDetector.setModelFile("yolov5best-fp16.tflite");
         yolo8TFLiteDetector.initialModel(this);
+        yolo8TFLiteDetector.addGPUDelegate();
 
         boxPaint.setStrokeWidth(5);
         boxPaint.setStyle(Paint.Style.STROKE);
@@ -167,7 +171,7 @@ public class Capturar extends AppCompatActivity {
                     textureView.setVisibility(View.GONE);
                 }
                 Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_PICK);
+                intent.setAction(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
                 startActivityForResult(intent, 10);
             }
@@ -176,48 +180,18 @@ public class Capturar extends AppCompatActivity {
         capturarBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                predecir();
-                HashMap<String,Productoss> detectedProductsMap = new HashMap<>();
-                for (Recognition recognition : recognitions) {
-                    if (recognition.getConfidence() > 0.1) {
-                        String nombreProducto = recognition.getLabelName();
-                        if (detectedProductsMap.containsKey(nombreProducto)) {
-                            detectedProductsMap.get(nombreProducto).incrementarCantidad(1);
-                        } else {
-                            detectedProductsMap.put(nombreProducto, new Productoss("", nombreProducto, "1", null, ""));
-                        }
-                    }
+                if(cameraDevce!=null){
+                    cameraDevce.close();
+                    cameraDevce=null;
+                    textureView.setVisibility(View.GONE);
                 }
-                // Agregar o actualizar el producto en el mapa
-                // Convertir el mapa a una lista
-                ArrayList<Productoss> detectedProducts = new ArrayList<>(detectedProductsMap.values());
-
-                // Iniciar DetectedProductsActivity con la lista de productos detectados
-                Intent intent = new Intent(Capturar.this, DetectedProductsActivity.class);
-                intent.putParcelableArrayListExtra("detectedProducts", detectedProducts);
-                startActivity(intent);
-
-
-                if (bitmap != null) {
-                    recognitions = yolo8TFLiteDetector.detect(bitmap);
-                    Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                    Canvas canvas = new Canvas(mutableBitmap);
-
-                    // Crear mapa de productos detectados para agrupar por nombre
-                    for (Recognition recognition : recognitions) {
-                        if (recognition.getConfidence() > 0.1) {
-                            RectF location = recognition.getLocation();
-                            canvas.drawRect(location, boxPaint);
-                            canvas.drawText(recognition.getLabelName() + ":" + recognition.getConfidence(), location.left, location.top, textPaint);
-
-                        }
-                    }
-
-                    Imagen.setImageBitmap(mutableBitmap);
-                } else {
+                if(recognitions!=null){recognitions.clear();}
+                predecir();
+                if (bitmap!=null){
+                    contar();
+                }else{
                     Toast.makeText(Capturar.this, "Carga una imagen primero", Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
 
@@ -236,23 +210,40 @@ public class Capturar extends AppCompatActivity {
             getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back_white);
         }
 
-        byte[] byteArray = getIntent().getByteArrayExtra("bitmap");
-        if (byteArray != null) {
-            bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-            Imagen.setImageBitmap(bitmap);
-        }
 
+    }
+
+    private void contar() {
+        HashMap<String,Productoss> detectedProductsMap = new HashMap<>();
+        for (Recognition recognition : recognitions) {
+            if (recognition.getConfidence() > 0.6) {
+                String nombreProducto = recognition.getLabelName();
+                if (detectedProductsMap.containsKey(nombreProducto)) {
+                    Objects.requireNonNull(detectedProductsMap.get(nombreProducto)).incrementarCantidad(1);
+                } else {
+                    detectedProductsMap.put(nombreProducto, new Productoss("", nombreProducto, "1", null, ""));
+                }
+            }
+        }
+        // Agregar o actualizar el producto en el mapa
+        // Convertir el mapa a una lista
+        ArrayList<Productoss> detectedProducts = new ArrayList<>(detectedProductsMap.values());
+
+        // Iniciar DetectedProductsActivity con la lista de productos detectados
+        Intent intent = new Intent(Capturar.this, DetectedProductsActivity.class);
+        intent.putParcelableArrayListExtra("detectedProducts", detectedProducts);
+        startActivity(intent);
     }
 
     private void predecir() {
         if(bitmap!=null){
-            ArrayList<Recognition>recognitions = yolo8TFLiteDetector.detect(bitmap);
+            recognitions = yolo8TFLiteDetector.detect(bitmap);
             Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888,true);
             Canvas canvas = new Canvas(mutableBitmap);
             int contmouse =0;
             for (Recognition recognition: recognitions){
                 System.out.println(recognition);
-                if(recognition.getConfidence()>0.1){
+                if(recognition.getConfidence()>0.6){
                     RectF location = recognition.getLocation();
                     canvas.drawRect(location,boxPaint);
                     canvas.drawText(recognition.getLabelName()+":"+recognition.getConfidence(),location.left,location.top,textPaint);
@@ -260,8 +251,6 @@ public class Capturar extends AppCompatActivity {
             }
             System.out.println("mouse negro: "+contmouse);
             Imagen.setImageBitmap(mutableBitmap);
-        }else {
-            Toast.makeText(Capturar.this, "Carga una imagen primero", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -380,6 +369,7 @@ public class Capturar extends AppCompatActivity {
         public boolean onOptionsItemSelected(MenuItem item) {
             if (item.getItemId() == android.R.id.home) {
                 finish();  // Finaliza la actividad y regresa
+                if (cameraDevce!=null){cameraDevce.close();}
                 return true;
             }
             return super.onOptionsItemSelected(item);
