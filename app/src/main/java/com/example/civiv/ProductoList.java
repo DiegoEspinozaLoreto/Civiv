@@ -49,7 +49,7 @@ public class ProductoList extends AppCompatActivity {
         databaseReference = FirebaseDatabase.getInstance().getReference("productos").child(userId);
         list = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MyAdapter(this, list);
+        adapter = new MyAdapter(this, list, userId);
         recyclerView.setAdapter(adapter);
         toolbar = findViewById(R.id.toolbar);
 
@@ -72,7 +72,8 @@ public class ProductoList extends AppCompatActivity {
                 list.clear();
                 for(DataSnapshot dataSnapshot: snapshot.getChildren()){
                     Productoss productoss = dataSnapshot.getValue(Productoss.class);
-                    list.add(productoss);
+                    if(productoss != null && productoss.getEliminado() == 0){
+                    list.add(productoss);}
                 }
                 adapter.notifyDataSetChanged();
             }

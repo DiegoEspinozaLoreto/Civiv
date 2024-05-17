@@ -277,12 +277,11 @@ public class InsertarProductos extends AppCompatActivity {
 
     private void InsertData(String nombreProducto, String cantidadProducto, List<String> imageUrls, String userId) {
         String id = databaseProductos.push().getKey();
-        Productoss productoss = new Productoss(id, nombreProducto, cantidadProducto, imageUrls, userId);
+        Productoss productoss = new Productoss(id, nombreProducto, cantidadProducto, imageUrls, userId, 0); // Establecer eliminado en 0
         databaseProductos.child("productos").child(userId).child(id).setValue(productoss)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        btnInsert.setEnabled(true);  // Reactivar el botón de insertar
                         if (task.isSuccessful()) {
                             Toast.makeText(InsertarProductos.this, "Producto insertado correctamente.", Toast.LENGTH_SHORT).show();
                             clearFields();

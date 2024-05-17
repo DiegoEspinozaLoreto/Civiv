@@ -13,6 +13,8 @@ public class Productoss implements Parcelable {
     private List<String> imageUrls;
     private String userId;
 
+    private int eliminado;
+
     public Productoss() {
         // Constructor vacío requerido para Firebase
     }
@@ -22,12 +24,13 @@ public class Productoss implements Parcelable {
         this.cantidad = String.valueOf(currentCantidad + cantidad);
     }
 
-    public Productoss(String id, String nombreProducto, String cantidad, List<String> imageUrls, String userId) {
+    public Productoss(String id, String nombreProducto, String cantidad, List<String> imageUrls, String userId, int eliminado) {
         this.id = id;
         this.nombreProducto = nombreProducto;
         this.cantidad = cantidad;
         this.imageUrls = imageUrls;
         this.userId = userId;
+        this.eliminado = 0;
     }
 
     protected Productoss(Parcel in) {
@@ -36,6 +39,7 @@ public class Productoss implements Parcelable {
         cantidad = in.readString();
         imageUrls = in.createStringArrayList();
         userId = in.readString();
+        eliminado = in.readInt();
     }
 
     public static final Creator<Productoss> CREATOR = new Creator<Productoss>() {
@@ -90,6 +94,14 @@ public class Productoss implements Parcelable {
         this.userId = userId;
     }
 
+    public int getEliminado() {
+        return eliminado;
+    }
+
+    public void setEliminado(int eliminado) {
+        this.eliminado = eliminado;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -102,5 +114,6 @@ public class Productoss implements Parcelable {
         dest.writeString(cantidad);
         dest.writeStringList(imageUrls);
         dest.writeString(userId);
+        dest.writeInt(eliminado);
     }
 }

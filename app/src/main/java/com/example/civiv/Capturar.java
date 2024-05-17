@@ -221,7 +221,7 @@ public class Capturar extends AppCompatActivity {
                 if (detectedProductsMap.containsKey(nombreProducto)) {
                     Objects.requireNonNull(detectedProductsMap.get(nombreProducto)).incrementarCantidad(1);
                 } else {
-                    detectedProductsMap.put(nombreProducto, new Productoss("", nombreProducto, "1", null, ""));
+                    detectedProductsMap.put(nombreProducto, new Productoss("", nombreProducto, "1", null, "", 0));
                 }
             }
         }
