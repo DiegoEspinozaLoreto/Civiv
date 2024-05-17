@@ -10,6 +10,7 @@ import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -142,7 +143,11 @@ public class InsertarProductos extends AppCompatActivity {
         btnInsert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                uploadMultipleImages(productImages, nombreProducto.getText().toString());
+                if (validateFields()) {
+                    btnInsert.setEnabled(false);  // Desactivar el botón de insertar
+                    Toast.makeText(InsertarProductos.this, "Subiendo imágenes, por favor espere...", Toast.LENGTH_SHORT).show();
+                    uploadMultipleImages(productImages, nombreProducto.getText().toString());
+                }
             }
         });
 
@@ -153,7 +158,7 @@ public class InsertarProductos extends AppCompatActivity {
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                activityResultLauncher.launch(Intent.createChooser(intent, "Selecciona las imagenes"));
+                activityResultLauncher.launch(Intent.createChooser(intent, "Selecciona las imágenes"));
             }
         });
 
@@ -202,18 +207,35 @@ public class InsertarProductos extends AppCompatActivity {
         });
     }
 
+    private boolean validateFields() {
+        String producto = nombreProducto.getText().toString().trim();
+        String cantidad = Cantidad.getText().toString().trim();
+
+        if (TextUtils.isEmpty(producto)) {
+            Toast.makeText(this, "Por favor, ingrese el nombre del producto.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (TextUtils.isEmpty(cantidad)) {
+            Toast.makeText(this, "Por favor, ingrese la cantidad del producto.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (productImages.isEmpty()) {
+            Toast.makeText(this, "Por favor, seleccione al menos una imagen.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
+    }
+
     private void checkFieldsForEmptyValues() {
         String producto = nombreProducto.getText().toString().trim();
         String cantidad = Cantidad.getText().toString().trim();
 
-        if (producto != null && cantidad != null) {
-            if (!TextUtils.isEmpty(producto) && !TextUtils.isEmpty(cantidad) && !productImages.isEmpty()) {
-                btnInsert.setEnabled(true);
-                aviso.setVisibility(View.INVISIBLE);
-            } else {
-                btnInsert.setEnabled(false);
-                aviso.setVisibility(View.VISIBLE);
-            }
+        if (!TextUtils.isEmpty(producto) && !TextUtils.isEmpty(cantidad) && !productImages.isEmpty()) {
+            btnInsert.setEnabled(true);
+            aviso.setVisibility(View.INVISIBLE);
         } else {
             btnInsert.setEnabled(false);
             aviso.setVisibility(View.VISIBLE);
@@ -244,6 +266,7 @@ public class InsertarProductos extends AppCompatActivity {
                             // Verifica si todas las posiciones están llenas (no null)
                             if (!imageUrls.contains(null)) {
                                 InsertData(producto, Cantidad.getText().toString(), imageUrls, userId);
+                                btnInsert.setEnabled(true);  // Reactivar el botón de insertar
                             }
                         }
                     });
@@ -259,6 +282,7 @@ public class InsertarProductos extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        btnInsert.setEnabled(true);  // Reactivar el botón de insertar
                         if (task.isSuccessful()) {
                             Toast.makeText(InsertarProductos.this, "Producto insertado correctamente.", Toast.LENGTH_SHORT).show();
                             clearFields();
@@ -268,7 +292,6 @@ public class InsertarProductos extends AppCompatActivity {
                     }
                 });
     }
-
 
     private void addNumberInputFilter(EditText editText) {
         editText.setFilters(new InputFilter[]{new InputFilter() {
@@ -285,18 +308,44 @@ public class InsertarProductos extends AppCompatActivity {
     }
 
     private void updateImagePreview() {
-
         ImagenPreview.removeAllViews();
+        for (int i = 0; i < productImages.size(); i++) {
+            final int index = i;
+            final Uri imageUri = productImages.get(i);
+            LinearLayout imageContainer = new LinearLayout(this);
+            imageContainer.setOrientation(LinearLayout.VERTICAL);
+            imageContainer.setGravity(Gravity.CENTER_HORIZONTAL); // Centrar horizontalmente el contenedor
 
-        for (Uri imageUri : productImages) {
             ImageView imageView = new ImageView(this);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(1000, 1000); // Tamaño ajustado
             layoutParams.setMargins(8, 8, 8, 8);
+            layoutParams.gravity = Gravity.CENTER; // Centrar la imagen
             imageView.setLayoutParams(layoutParams);
             Glide.with(getApplicationContext()).load(imageUri).into(imageView);
-            ImagenPreview.addView(imageView);
+
+            ImageView deleteIcon = new ImageView(this);
+            deleteIcon.setImageResource(android.R.drawable.ic_delete);
+            LinearLayout.LayoutParams deleteIconParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            deleteIconParams.gravity = Gravity.CENTER; // Centrar el icono de eliminación
+            deleteIcon.setLayoutParams(deleteIconParams);
+            deleteIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    productImages.remove(index);
+                    updateImagePreview();
+                    checkFieldsForEmptyValues();
+                }
+            });
+
+            imageContainer.addView(imageView);
+            imageContainer.addView(deleteIcon);
+            ImagenPreview.addView(imageContainer);
         }
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
