@@ -83,7 +83,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                                 int adapterPosition = holder.getAdapterPosition();
                                 if (adapterPosition != RecyclerView.NO_POSITION) {
                                     list.remove(adapterPosition);
-                                    notifyItemRemoved(adapterPosition);
+                                    notifyDataSetChanged(); //
                                     Toast.makeText(context, "Producto eliminado", Toast.LENGTH_SHORT).show();
                                 }
                             } else {
