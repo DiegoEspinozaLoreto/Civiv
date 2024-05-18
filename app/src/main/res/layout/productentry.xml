@@ -64,8 +64,10 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="end"
+                    android:padding="8dp"
                     android:layout_marginLeft="200dp"
                     android:src="@drawable/delete" />
+
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

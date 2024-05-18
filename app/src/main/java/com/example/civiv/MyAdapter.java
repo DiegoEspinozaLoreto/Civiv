@@ -1,8 +1,8 @@
 package com.example.civiv;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -18,24 +18,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.security.MessageDigest;
 import java.util.ArrayList;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
-
     Context context;
     ArrayList<Productoss> list;
-
     String userId;
 
     public MyAdapter(Context context, ArrayList<Productoss> list, String userId) {
@@ -47,9 +39,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     @Override
     public void onViewRecycled(@NonNull MyViewHolder holder) {
         super.onViewRecycled(holder);
-        Glide.with(context).clear(holder.imagen);
+        if (context != null && !((Activity) context).isDestroyed()) {
+            Glide.with(context).clear(holder.imagen);
+        }
     }
-
 
     @NonNull
     @Override
@@ -64,36 +57,39 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         setBoldText(holder.product, "Producto:", productoss.getNombreProducto());
         setBoldText(holder.cantidad, "Cantidad:", productoss.getCantidad());
 
-
         // Cargar la primera imagen disponible para el producto, si existe
         if (productoss.getImageUrls() != null && !productoss.getImageUrls().isEmpty()) {
             Glide.with(context)
-                    .load(productoss.getImageUrls().get(0)) // Asumimos que al menos una imagen está disponible
-                    .apply(new RequestOptions().override(100, 100)) // Ajusta el tamaño según tus necesidades
+                    .load(productoss.getImageUrls().get(0))
+                    .apply(new RequestOptions().override(100, 100))
                     .into(holder.imagen);
         } else {
-            // Opcionalmente puedes poner una imagen predeterminada si no hay imágenes
-            holder.imagen.setImageResource(R.drawable.civiv2); // Coloca aquí tu imagen predeterminada
+            holder.imagen.setImageResource(R.drawable.civiv2);
         }
 
+        // Establecer el icono de eliminación
+        holder.btnDelete.setImageResource(R.drawable.delete);
 
+        // Manejar el clic en el icono de eliminación
         holder.btnDelete.setOnClickListener(v -> {
             new AlertDialog.Builder(context)
                     .setTitle("Eliminar Producto")
                     .setMessage("¿Estás seguro de que deseas eliminar este producto?")
                     .setPositiveButton("Sí", (dialog, which) -> {
-                        DatabaseReference productRef = FirebaseDatabase.getInstance().getReference("productos")
-                                .child(productoss.getUserId()).child(productoss.getId());
-                        productRef.child("eliminado").setValue(1)
-                                .addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(context, "Producto eliminado correctamente.", Toast.LENGTH_SHORT).show();
-                                        list.remove(position);
-                                        notifyItemRemoved(position);
-                                    } else {
-                                        Toast.makeText(context, "Error al eliminar producto.", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                        String productId = productoss.getId();
+                        DatabaseReference productRef = FirebaseDatabase.getInstance().getReference("productos").child(userId).child(productId);
+                        productRef.child("eliminado").setValue(1).addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                int adapterPosition = holder.getAdapterPosition();
+                                if (adapterPosition != RecyclerView.NO_POSITION) {
+                                    list.remove(adapterPosition);
+                                    notifyItemRemoved(adapterPosition);
+                                    Toast.makeText(context, "Producto eliminado", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                Toast.makeText(context, "Error al eliminar producto", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     })
                     .setNegativeButton("No", null)
                     .show();
@@ -106,51 +102,21 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     }
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
-        TextView product, cantidad, id;
-        ImageView imagen, btnDelete; // Agregar ImageView
-
-
+        TextView product, cantidad;
+        ImageView imagen, btnDelete;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             product = itemView.findViewById(R.id.textProduct);
             cantidad = itemView.findViewById(R.id.textCantidad);
             imagen = itemView.findViewById(R.id.imagenProducto);
-            btnDelete = itemView.findViewById(R.id.btnDelete);// Asegúrate de que este ID corresponde al ImageView en tu layout XML
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }
-
 
     private void setBoldText(TextView textView, String label, String value) {
         SpannableStringBuilder spannable = new SpannableStringBuilder(label + "\n" + value);
         spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         textView.setText(spannable);
     }
-
-
-    private void markProductAsDeleted(String productId) {
-        DatabaseReference productRef = FirebaseDatabase.getInstance().getReference("productos").child(userId).child(productId);
-        productRef.child("eliminado").setValue(1).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(context, "Producto marcado como eliminado.", Toast.LENGTH_SHORT).show();
-                    // Actualizar la lista y notificar el cambio
-                    for (int i = 0; i < list.size(); i++) {
-                        if (list.get(i).getId().equals(productId)) {
-                            list.remove(i);
-                            notifyItemRemoved(i);
-                            break;
-                        }
-                    }
-                } else {
-                    Toast.makeText(context, "Error al marcar producto como eliminado.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
 }
-
-
-

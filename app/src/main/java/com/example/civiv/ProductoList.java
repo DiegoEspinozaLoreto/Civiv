@@ -34,7 +34,7 @@ public class ProductoList extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        startActivity(new Intent(ProductoList.this,MainActivity.class));
+        startActivity(new Intent(ProductoList.this, MainActivity.class));
         finish();
     }
 
@@ -44,7 +44,7 @@ public class ProductoList extends AppCompatActivity {
         setContentView(R.layout.activity_producto_list);
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        recyclerView = findViewById(R.id.RecyclerView); // Corregir la inicialización aquí
+        recyclerView = findViewById(R.id.RecyclerView);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("productos").child(userId);
         list = new ArrayList<>();
@@ -55,7 +55,7 @@ public class ProductoList extends AppCompatActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
-            ((Window) window).addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(getResources().getColor(R.color.dots_background));
         }
 
@@ -70,10 +70,11 @@ public class ProductoList extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 list.clear();
-                for(DataSnapshot dataSnapshot: snapshot.getChildren()){
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Productoss productoss = dataSnapshot.getValue(Productoss.class);
-                    if(productoss != null && productoss.getEliminado() == 0){
-                    list.add(productoss);}
+                    if (productoss != null && productoss.getEliminado() == 0) {
+                        list.add(productoss);
+                    }
                 }
                 adapter.notifyDataSetChanged();
             }
@@ -88,12 +89,9 @@ public class ProductoList extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-           finish();  // Finaliza la actividad y regresa
+            finish();  // Finaliza la actividad y regresa
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
 }
-
-
