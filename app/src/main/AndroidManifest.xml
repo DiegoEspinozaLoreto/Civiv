@@ -48,10 +48,6 @@
             android:exported="true"
             android:screenOrientation="portrait"/>
 
-        <activity
-            android:name=".calculadora"
-            android:exported="true"
-            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".Training"
